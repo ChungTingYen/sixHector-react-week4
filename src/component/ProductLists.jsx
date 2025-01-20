@@ -230,7 +230,6 @@ const ProductLists = () => {
     const wrapData = {
       data: productDataAtLocal[productIndex],
     };
-      // setTempProduct(null);
     try {
       const headers = utils.getHeadersFromCookie();
       const resProduct = await apiService.axiosPostAddProduct(
@@ -248,13 +247,10 @@ const ProductLists = () => {
     //上傳全部內建資料產品，先留著
   const handleAddAllProducts = async () => {
     // modalStatus("上傳中", null, false);
-    // const headers = utils.getHeadersFromCookie();
     const results = await utils.AddProductsSequentially(productDataAtLocal);
-    // utils.getProductData(headers, setProductData, pagesRef);
-    getProductDataNormal();
+    results.data.success && getProductDataNormal();
     setEditProduct(tempProductDefaultValue);
     if (results.length > 0) alert(results.join(","));
-    // appModalRef.current.close();
   };
   useEffect(() => {
     getProductDataNormal();
