@@ -10,18 +10,19 @@ const Product = (props) => {
     origin_price,
     price,
     is_enabled,
-    onGetProduct,
-    onDeleteProduct,
+    // onGetProduct,
+    // onDeleteProduct,
     isSelected,
     handleOpenEditModalWithValue,
     handleDeleteModal,
+    
   } = props;
-  const atGetProduct = () => {
-    onGetProduct(id);
-  };
-  const atDeleteProduct = () => {
-    onDeleteProduct(id);
-  };
+  // const atGetProduct = () => {
+  //   onGetProduct(id);
+  // };
+  // const atDeleteProduct = () => {
+  //   onDeleteProduct(id);
+  // };
   const atOpenEditMOdal = () => {
     handleOpenEditModalWithValue("edit", id);
   };
@@ -42,7 +43,7 @@ const Product = (props) => {
               {is_enabled ? "Y" : "N"}
             </span>
           </td>
-          {/* <td>
+          {/* <td> 第二周功能
             <button
               type="button"
               className="btn btn-primary"
@@ -61,7 +62,7 @@ const Product = (props) => {
             </button>
           </td> */}
           <td>
-            <div className="btn-group">
+            <div className="d-flex justify-content-end btn-group">
               <button
                 type="button"
                 className="btn btn-outline-primary btn-sm"

@@ -8,15 +8,13 @@ import React, {
   useState,
 } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import * as bootstrap from "bootstrap";
+import { Modal } from "bootstrap";
 
-const Modal = forwardRef((props, ref) => {
+const ProductDetailModal = forwardRef((props, ref) => {
   const { modalBodyText, modalSize, modalImgSize } = props;
   const modalDivRef1 = useRef(null);
   const modalRef1 = useRef(null);
   const imageRef = useRef(null);
-  // const initRef = useRef(false);
-  // const [imageSrc, setImageSrc] = useState("");
   // const restoreStyle = () => {
   //   // 清除 modal 陰影
   //   document.querySelectorAll(".modal-backdrop").forEach((el) => el.remove());
@@ -25,27 +23,16 @@ const Modal = forwardRef((props, ref) => {
   //   console.log('restoreStyle');
   // };
   useEffect(() => {
-    modalRef1.current = new bootstrap.Modal(modalDivRef1.current);
+    modalRef1.current = new Modal(modalDivRef1.current);
   }, []);
-  //原本的寫法
-  // useEffect(() => {
-  //   modalRef1.current = new bootstrap.Modal(modalDivRef1.current);
-  //   if (initRef.current) {
-  //     openModal();
-  //     document.querySelectorAll(".modal-backdrop").forEach((el) => el.remove());
-  //   }
-  //   console.log('initRef.current=',initRef.current);
-  //   const modalElement = document.getElementById("myModal");
-  //   modalElement.addEventListener("hidden.bs.modal", null);
-  //   return () => {
-  //     modalElement.removeEventListener("hidden.bs.modal", restoreStyle);
-  //   };
-  // }, [imageSrc]);
   const closeModal = () => {
+    // const modalInstance = Modal.getInstance(modalDivRef1.current);
+    // modalInstance.hide();
     modalRef1.current.hide();
-    // restoreStyle();
   };
   const openModal = () => {
+    // const modalInstance = Modal.getInstance(modalDivRef1.current);
+    // modalInstance.show();
     modalRef1.current.show();
   };
 
@@ -148,4 +135,4 @@ const Modal = forwardRef((props, ref) => {
     </>
   );
 });
-export default Modal;
+export default ProductDetailModal;

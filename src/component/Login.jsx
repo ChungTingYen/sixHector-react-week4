@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from "react";
 // import axios from "axios";
+import { useState, useEffect } from "react";
 import * as apiService from "../apiService/apiService";
 import * as utils from "../utils/utils";
 
@@ -16,7 +16,6 @@ const Login = (props) => {
       [e.target.name]: e.target.value,
     });
   };
-  const APIPath = import.meta.env.VITE_API_PATH;
   //登入
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -44,15 +43,15 @@ const Login = (props) => {
     const headers = utils.getHeadersFromCookie();
     if (headers === null) return;
     try {
-      // const headers = utils.getHeadersFromCookie();
       await apiService.axiosPostCheckSingin("/api/user/check", headers);
       setIsLogin(true);
     } catch (error) {
-      alert("error:", error?.response.data.message || error);
+      // alert("error123:",  error);
       console.log(error);
     }
   };
   useEffect(() => {
+    console.log('handleCheckLogin2');
     handleCheckLogin2();
   });
   return (

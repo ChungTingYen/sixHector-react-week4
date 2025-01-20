@@ -6,8 +6,8 @@ export { default as ProductEditModal } from './ProductEditModal';
 export { default as Products } from './Products';
 export { default as ProductDetail } from './ProductDetail';
 export { default as Loading } from './ProductDetail';
-export { default as Input } from './Input';
 
 export { default as ProductLists } from './ProductLists';
 export { default as Login } from './Login';
+export { default as AppFunction } from './AppFunction';
 
