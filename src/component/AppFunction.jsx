@@ -3,9 +3,9 @@ import React from "react";
 import * as apiService from "../apiService/apiService";
 import { productDataAtLocal } from "../productDataAtLocal";
 import * as utils from "../utils/utils";
-const AppFunction = (props) =>{
+const AppFunction = (props) => {
   const { setIsLogin } = props;
-    
+
   const APIPath = import.meta.env.VITE_API_PATH;
   //檢查登入狀態
   const handleCheckLogin = async () => {
@@ -38,27 +38,29 @@ const AppFunction = (props) =>{
       console.log(error);
     }
   };
-  return (<>
-    <div className="row mt-5 mx-2">
-      <div className="d-flex">
-        <h3>外層功能</h3>
-        <button
-          type="button"
-          className="btn btn-warning mx-2"
-          onClick={handleCheckLogin}
-        >
-                檢查登入狀態
-        </button>
-        <button
-          type="button"
-          className="btn btn-warning me-2"
-          onClick={handleLogout}
-        >
+  return (
+    <>
+      <div className="row mt-5 mt-1 mb-2 mx-1">
+        <div className="d-flex">
+          <h3>外層功能</h3>
+          <button
+            type="button"
+            className="btn btn-warning mx-2"
+            onClick={handleCheckLogin}
+          >
+            檢查登入狀態
+          </button>
+          <button
+            type="button"
+            className="btn btn-warning me-2"
+            onClick={handleLogout}
+          >
             登出
-        </button>
+          </button>
+        </div>
       </div>
-    </div>
-  </>);
+    </>
+  );
 };
 
 export default AppFunction;

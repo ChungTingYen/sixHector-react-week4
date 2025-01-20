@@ -5,8 +5,9 @@ export const  axiosGetProductData = async(path,config)=>{
   return response;
 };
 
-export const  axiosGetProductData2 = async(path,config)=>{
+export const  axiosGetProductDataByConfig = async(path,config)=>{
   const response = await adminInstance.get(path,  config ) || {};
+  // console.log('config=',config);
   return response;
 };
 
