@@ -1,11 +1,16 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-// import axios from "axios";
-import * as apiService from "../../apiService/apiService";
-import { Products, ProductDetailModal } from "..";
-import * as utils from "../../utils/utils";
-import { productDataAtLocal } from "../../products";
-import { tempProductDefaultValue } from "../../defaultValue";
 import { Modal } from "bootstrap";
+// import axios from "axios";
+import * as apiService from "../apiService/apiService";
+import * as utils from "../utils/utils";
+import { productDataAtLocal } from "../data/products";
+import { tempProductDefaultValue } from "../data/defaultValue";
+import {
+  Products,
+  ProductDetailModal,
+  Pagination,
+  ProductModal,
+} from "../component";
 import { useDebounce } from "@uidotdev/usehooks";
 const APIPath = import.meta.env.VITE_API_PATH;
 
@@ -14,46 +19,46 @@ const ProductLists = () => {
   const [editProduct, setEditProduct] = useState(tempProductDefaultValue);
   const [modalMode, setModalMode] = useState(null);
   const [pageInfo, setPageInfo] = useState({});
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
   const [priceAscending, setPriceAscending] = useState(false);
   const editModalDivRef = useRef(null);
   const deleteModalDivRef = useRef(null);
   const appModalRef = useRef(null);
   const uploadRef = useRef(null);
 
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+
   const debouncedSearchTerm = useDebounce(category, 1000);
   const handleSearchCategory = (e) => {
     setCategory(e.target.value);
   };
-  const getCategoryProducts = async (query)=>{
+  const getCategoryProducts = async (query) => {
     modalStatus("Desbounce 更新中", null, false);
-    console.log('debounce');
+    console.log("debounce");
     try {
-      const headers = utils.getHeadersFromCookie(); 
-      const resProduct =  
-          await apiService.axiosGetProductDataByConfig(  
-            `/api/${APIPath}/admin/products`, 
-            { 
-              params: { 
-                category: query,  
-              },  
-              headers: headers, 
-            } 
-          ); 
+      const headers = utils.getHeadersFromCookie();
+      const resProduct = await apiService.axiosGetProductDataByConfig(
+        `/api/${APIPath}/admin/products`,
+        {
+          params: {
+            category: query,
+          },
+          headers: headers,
+        }
+      );
       setProductData(resProduct.data.products);
     } catch (error) {
-      console.log('error:',error);
+      console.log("error:", error);
     }
     appModalRef.current.close();
   };
-  useEffect(()=>{
-    debouncedSearchTerm ?
-      getCategoryProducts(debouncedSearchTerm)
-      :
-      handleGetProducts();
-    console.log('debouncedSearchTerm=',debouncedSearchTerm);
-  },[debouncedSearchTerm]);
+  useEffect(() => {
+    debouncedSearchTerm
+      ? getCategoryProducts(debouncedSearchTerm)
+      : handleGetProducts();
+    console.log("debouncedSearchTerm=", debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
 
   const modalStatus = (imgAlt, modalImg, toggleFooter) => {
     // appModalRef.current.setImgAlt(imgAlt);
@@ -62,31 +67,32 @@ const ProductLists = () => {
     appModalRef.current.open();
   };
   const filterData = useMemo(() => {
-    return [...productData]
-      .filter((item) => item.title.match(search))
-      // .sort((a, b) => a.title.localeCompare(b.title))
-      .sort((a, b) => priceAscending && a.price - b.price);
+    return (
+      [...productData]
+        .filter((item) => item.title.match(search))
+        // .sort((a, b) => a.title.localeCompare(b.title))
+        .sort((a, b) => priceAscending && a.price - b.price)
+    );
   }, [productData, search, priceAscending]);
 
-  const handleGetProducts = async ()=>{
+  const handleGetProducts = async () => {
     modalStatus("更新中", null, false);
     await getProductData();
     appModalRef.current.close();
   };
   const getProductData = async (page = 1) => {
     try {
-      const headers = utils.getHeadersFromCookie(); 
-      const resProduct =  
-          (await apiService.axiosGetProductDataByConfig(  
-            `/api/${APIPath}/admin/products`, 
-            { 
-              params: { 
-                page: page, 
-                category: pageInfo.category,  
-              },  
-              headers: headers, 
-            } 
-          )); 
+      const headers = utils.getHeadersFromCookie();
+      const resProduct = await apiService.axiosGetProductDataByConfig(
+        `/api/${APIPath}/admin/products`,
+        {
+          params: {
+            page: page,
+            category: pageInfo.category,
+          },
+          headers: headers,
+        }
+      );
       setProductData(resProduct.data.products);
       setPageInfo(resProduct.data.pagination);
     } catch (error) {
@@ -98,7 +104,7 @@ const ProductLists = () => {
   const handleOpenEditModalWithValue = useCallback(
     (mode, productId = null) => {
       setEditProduct(tempProductDefaultValue);
-      uploadRef.current.value = '';
+      // uploadRef.current.value = "";
       if (mode === "create") {
         setModalMode(mode);
       } else if (productId && mode === "edit") {
@@ -113,53 +119,54 @@ const ProductLists = () => {
         setEditProduct(updatedProduct);
         setModalMode(mode);
       }
-      openEditModal();
+      setIsProductModalOpen(true);
+      // openEditModal();
     },
     [productData]
   );
-  const openEditModal = () => {
-    const modalInstance = Modal.getInstance(editModalDivRef.current);
-    modalInstance.show();
-  };
-  const closeEditModal = () => {
-    setModalMode(null);
-    setEditProduct(tempProductDefaultValue);
-    const modalInstance = Modal.getInstance(editModalDivRef.current);
-    modalInstance.hide();
-  };
+  // const openEditModal = () => {
+  //   const modalInstance = Modal.getInstance(editModalDivRef.current);
+  //   modalInstance.show();
+  // };
+  // const closeEditModal = () => {
+  //   setModalMode(null);
+  //   setEditProduct(tempProductDefaultValue);
+  //   const modalInstance = Modal.getInstance(editModalDivRef.current);
+  //   modalInstance.hide();
+  // };
 
-  const handleEditDataChange = (e) => {
-    const { name, type, value, checked } = e.target;
-    let tempValue;
-    if (type === "number") tempValue = Number(value);
-    else if (type === "checkbox") tempValue = checked;
-    else tempValue = value;
-    const temp = {
-      ...editProduct,
-      [name]: tempValue,
-    };
-    setEditProduct(temp);
-  };
-  const handleImgsUrlChange = useCallback(
-    (e, index) => {
-      // console.log(e.target);
-      const { value } = e.target;
-      const newImageUrl = [...editProduct.imagesUrl];
-      newImageUrl[index] = value;
-      setEditProduct((prev) => ({ ...prev, imagesUrl: newImageUrl }));
-    },
-    [editProduct]
-  );
-  const handleAddImage = () => {
-    const newImageUrl = [...editProduct.imagesUrl];
-    newImageUrl.push("");
-    setEditProduct((prev) => ({ ...prev, imagesUrl: newImageUrl }));
-  };
-  const handleRemoveImage = () => {
-    const newImageUrl = [...editProduct.imagesUrl];
-    newImageUrl.pop();
-    setEditProduct((prev) => ({ ...prev, imagesUrl: newImageUrl }));
-  };
+  // const handleEditDataChange = (e) => {
+  //   const { name, type, value, checked } = e.target;
+  //   let tempValue;
+  //   if (type === "number") tempValue = Number(value);
+  //   else if (type === "checkbox") tempValue = checked;
+  //   else tempValue = value;
+  //   const temp = {
+  //     ...editProduct,
+  //     [name]: tempValue,
+  //   };
+  //   setEditProduct(temp);
+  // };
+  // const handleImgsUrlChange = useCallback(
+  //   (e, index) => {
+  //     // console.log(e.target);
+  //     const { value } = e.target;
+  //     const newImageUrl = [...editProduct.imagesUrl];
+  //     newImageUrl[index] = value;
+  //     setEditProduct((prev) => ({ ...prev, imagesUrl: newImageUrl }));
+  //   },
+  //   [editProduct]
+  // );
+  // const handleAddImage = () => {
+  //   const newImageUrl = [...editProduct.imagesUrl];
+  //   newImageUrl.push("");
+  //   setEditProduct((prev) => ({ ...prev, imagesUrl: newImageUrl }));
+  // };
+  // const handleRemoveImage = () => {
+  //   const newImageUrl = [...editProduct.imagesUrl];
+  //   newImageUrl.pop();
+  //   setEditProduct((prev) => ({ ...prev, imagesUrl: newImageUrl }));
+  // };
   const handleDeleteModal = useCallback(
     (productId) => {
       // console.log("handleDeleteModal,productId=", productId);
@@ -170,58 +177,58 @@ const ProductLists = () => {
     },
     [productData]
   );
-  const implementEditProduct = async (type, editProduct) => {
-    try {
-      const headers = utils.getHeadersFromCookie();
-      const wrapData = {
-        data: {
-          ...editProduct,
-          is_enabled: editProduct.is_enabled ? 1 : 0,
-          //price,original_price在取得輸入資料時handleEditDataChange已處理過
-        },
-      };
-      let path = "";
-      // const res = null;
-      switch (type) {
-      case "create":
-        path = `/api/${APIPath}/admin/product`;
-        await apiService.axiosPostAddProduct(path, wrapData, headers);
-        break;
-      case "edit":
-        path = `/api/${APIPath}/admin/product/${editProduct.id}`;
-        await apiService.axiosPutProduct(path, wrapData, headers);
-        break;
-      default:
-        break;
-      }
-      return true;
-    } catch (error) {
-      console.log(error);
-      return false;
-      // alert("上傳失敗");
-    }
-  };
-  const handleUpdateProduct = async () => {
-    if (!editProduct.id && modalMode === "edit") {
-      alert("未取得product ID");
-      return;
-    }
-    modalStatus("更新中", null, false);
-    try {
-      const result = await implementEditProduct(modalMode, editProduct);
-      if (result) {
-        getProductData();
-        setEditProduct(tempProductDefaultValue);
-        alert(modalMode === "create" ? "新增完成" : "更新完成");
-      } else {
-        alert(modalMode === "create" ? "新增失敗:" : "更新失敗:");
-      }
-    } catch (error) {
-      alert(modalMode === "create" ? "新增失敗:" : "更新失敗:" + error);
-    }
-    appModalRef.current.close();
-    closeEditModal();
-  };
+  // const implementEditProduct = async (type, editProduct) => {
+  //   try {
+  //     const headers = utils.getHeadersFromCookie();
+  //     const wrapData = {
+  //       data: {
+  //         ...editProduct,
+  //         is_enabled: editProduct.is_enabled ? 1 : 0,
+  //         //price,original_price在取得輸入資料時handleEditDataChange已處理過
+  //       },
+  //     };
+  //     let path = "";
+  //     // const res = null;
+  //     switch (type) {
+  //       case "create":
+  //         path = `/api/${APIPath}/admin/product`;
+  //         await apiService.axiosPostAddProduct(path, wrapData, headers);
+  //         break;
+  //       case "edit":
+  //         path = `/api/${APIPath}/admin/product/${editProduct.id}`;
+  //         await apiService.axiosPutProduct(path, wrapData, headers);
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //     return true;
+  //   } catch (error) {
+  //     console.log(error);
+  //     return false;
+  //     // alert("上傳失敗");
+  //   }
+  // };
+  // const handleUpdateProduct = async () => {
+  //   if (!editProduct.id && modalMode === "edit") {
+  //     alert("未取得product ID");
+  //     return;
+  //   }
+  //   modalStatus("更新中", null, false);
+  //   try {
+  //     const result = await implementEditProduct(modalMode, editProduct);
+  //     if (result) {
+  //       getProductData();
+  //       setEditProduct(tempProductDefaultValue);
+  //       alert(modalMode === "create" ? "新增完成" : "更新完成");
+  //     } else {
+  //       alert(modalMode === "create" ? "新增失敗:" : "更新失敗:");
+  //     }
+  //   } catch (error) {
+  //     alert(modalMode === "create" ? "新增失敗:" : "更新失敗:" + error);
+  //   }
+  //   appModalRef.current.close();
+  //   closeEditModal();
+  // };
   const openDeleteModal = () => {
     const modalInstance = Modal.getInstance(deleteModalDivRef.current);
     modalInstance.show();
@@ -252,13 +259,13 @@ const ProductLists = () => {
     appModalRef.current.close();
     closeDeleteModal();
   };
-  const handleImgToMaster = (e, imgsIndex) => {
-    const temp = editProduct.imagesUrl.map((item, index) =>
-      index === imgsIndex ? editProduct.imageUrl : item
-    );
-    const tt = { ...editProduct, imagesUrl: temp, imageUrl: e.target.src };
-    setEditProduct(tt);
-  };
+  // const handleImgToMaster = (e, imgsIndex) => {
+  //   const temp = editProduct.imagesUrl.map((item, index) =>
+  //     index === imgsIndex ? editProduct.imageUrl : item
+  //   );
+  //   const tt = { ...editProduct, imagesUrl: temp, imageUrl: e.target.src };
+  //   setEditProduct(tt);
+  // };
   //上傳內建資料隨機一項產品
   const handleAddProduct = async () => {
     modalStatus("更新中", null, false);
@@ -302,24 +309,26 @@ const ProductLists = () => {
     }
     appModalRef.current.close();
   };
-  const handlePageChange = (page) => {
-    getProductData(page);
-  };
 
-  const handleImgUpload = async(e)=>{
-    modalStatus("上傳中", null, false);
-    try {
-      const headers = utils.getHeadersFromCookie();
-      const formData = new FormData();
-      formData.append('file-to-upload',e.target.files[0]);
-      const result = await apiService.axiosPostImg( `/api/${APIPath}/admin/upload`,formData,headers);
-      result?.data?.success && setEditProduct({ ...editProduct,imageUrl:result.data.imageUrl });
-    } catch (error) {
-      alert('上傳主圖錯誤:' + error);
-      console.log(error);
-    }
-    appModalRef.current.close();
-  };
+  // const handleImgUpload = async (e) => {
+  //   modalStatus("上傳中", null, false);
+  //   try {
+  //     const headers = utils.getHeadersFromCookie();
+  //     const formData = new FormData();
+  //     formData.append("file-to-upload", e.target.files[0]);
+  //     const result = await apiService.axiosPostImg(
+  //       `/api/${APIPath}/admin/upload`,
+  //       formData,
+  //       headers
+  //     );
+  //     result?.data?.success &&
+  //       setEditProduct({ ...editProduct, imageUrl: result.data.imageUrl });
+  //   } catch (error) {
+  //     alert("上傳主圖錯誤:" + error);
+  //     console.log(error);
+  //   }
+  //   appModalRef.current.close();
+  // };
 
   useEffect(() => {
     getProductData();
@@ -328,9 +337,9 @@ const ProductLists = () => {
     if (editModalDivRef.current) {
       new Modal(editModalDivRef.current, { backdrop: false });
     }
-    if (deleteModalDivRef.current) {
-      new Modal(deleteModalDivRef.current, { backdrop: false });
-    }
+    // if (deleteModalDivRef.current) {
+    //   new Modal(deleteModalDivRef.current, { backdrop: false });
+    // }
   }, []);
 
   return (
@@ -374,7 +383,7 @@ const ProductLists = () => {
               className="btn btn-primary mx-1"
               onClick={() => handleOpenEditModalWithValue("create")}
             >
-            建立新的產品
+              建立新的產品
             </button>
           </div>
         </div>
@@ -389,8 +398,13 @@ const ProductLists = () => {
               }}
               value={search}
             />
-            <button type='button' className="btn btn-secondary mx-1" 
-              onClick={()=>setSearch('')}>清除</button>
+            <button
+              type="button"
+              className="btn btn-secondary mx-1"
+              onClick={() => setSearch("")}
+            >
+              清除
+            </button>
           </div>
           <div className="me-2 mx-1">
             價格排序:
@@ -411,11 +425,15 @@ const ProductLists = () => {
               onChange={handleSearchCategory}
               value={category}
             />
-            <button type='button' className="btn btn-secondary mx-1" 
-              onClick={(e)=>handleSearchCategory(e)}>清除</button>
+            <button
+              type="button"
+              className="btn btn-secondary mx-1"
+              onClick={(e) => handleSearchCategory(e)}
+            >
+              清除
+            </button>
           </div>
         </div>
-       
       </div>
       {productData.length > 0 ? (
         <>
@@ -438,7 +456,7 @@ const ProductLists = () => {
                 </thead>
                 <tbody>
                   {filterData.map((product, index) => {
-                  // {productData.map((product, index) => {
+                    // {productData.map((product, index) => {
                     return (
                       <Products
                         key={product.id}
@@ -457,64 +475,13 @@ const ProductLists = () => {
                 </tbody>
               </table>
             </div>
-            <div className="d-flex justify-content-center">
-              <nav>
-                <ul className="pagination">
-                  <li
-                    className={`page-item ${!pageInfo.has_pre && "disabled"}`}
-                  >
-                    <a
-                      className="page-link"
-                      href="#"
-                      onClick={() =>
-                        handlePageChange(pageInfo.current_page - 1)
-                      }
-                    >
-                      上一頁
-                    </a>
-                  </li>
-                  {Array.from({ length: pageInfo.total_pages }).map(
-                    (_, index) => {
-                      return (
-                        <li
-                          className={`page-item ${
-                            pageInfo.current_page === index + 1 && "active"
-                          } `}
-                          key={index + 1}
-                        >
-                          <a
-                            className="page-link"
-                            onClick={() => handlePageChange(index + 1)}
-                            href="#"
-                          >
-                            {index + 1}
-                          </a>
-                        </li>
-                      );
-                    }
-                  )}
-                  <li
-                    className={`page-item ${!pageInfo.has_next && "disabled"}`}
-                  >
-                    <a
-                      className="page-link"
-                      href="#"
-                      onClick={() =>
-                        handlePageChange(pageInfo.current_page + 1)
-                      }
-                    >
-                      下一頁
-                    </a>
-                  </li>
-                </ul>
-              </nav>
-            </div>
           </div>
+          <Pagination getProductData={getProductData} pageInfo={pageInfo} />
         </>
       ) : (
         <h1>沒有商品或商品載入中</h1>
       )}
-      <div
+      {/* <div
         id="productModal"
         className="modal fade"
         style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1050 }}
@@ -657,7 +624,10 @@ const ProductLists = () => {
               <div className="row g-4">
                 <div className="col-12 ">
                   <div className="mb-3">
-                    <label htmlFor="fileInput" className="form-label"> 主圖上傳 </label>
+                    <label htmlFor="fileInput" className="form-label">
+                      {" "}
+                      主圖上傳{" "}
+                    </label>
                     <input
                       type="file"
                       accept=".jpg,.jpeg,.png"
@@ -744,13 +714,13 @@ const ProductLists = () => {
                 {editProduct.imagesUrl.length < 5 &&
                   editProduct.imagesUrl[editProduct.imagesUrl.length - 1] !==
                     "" && (
-                  <button
-                    className="btn btn-outline-primary btn-sm w-50"
-                    onClick={(e) => handleAddImage(e.target.value)}
-                  >
+                    <button
+                      className="btn btn-outline-primary btn-sm w-50"
+                      onClick={(e) => handleAddImage(e.target.value)}
+                    >
                       新增圖片
-                  </button>
-                )}
+                    </button>
+                  )}
                 {editProduct.imagesUrl.length > 1 && (
                   <button
                     className="btn btn-outline-danger btn-sm w-50"
@@ -780,7 +750,18 @@ const ProductLists = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
+      <ProductModal
+        setEditProduct={setEditProduct}
+        editProduct={editProduct}
+        setModalMode={setModalMode}
+        modalMode={modalMode}
+        modalStatus={modalMode}
+        getProductData={getProductData}
+        isProductModalOpen={isProductModalOpen}
+        setIsProductModalOpen={setIsProductModalOpen}
+        // ref={uploadRef}
+      />
       <div
         className="modal fade"
         id="delProductModal"

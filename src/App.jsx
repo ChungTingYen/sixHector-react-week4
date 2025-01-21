@@ -1,10 +1,6 @@
- 
 import { useState } from "react";
-import {
-  ProductLists,
-  Login,
-  AppFunction,
-} from "./component";
+import { AppFunction } from "./component";
+import { ProductListsPage, LoginPage } from "./pages";
 function App() {
   const [isLogin, setIsLogin] = useState(false);
 
@@ -23,11 +19,11 @@ function App() {
       {/* <pre>{JSON.stringify(productData, null, 2)}</pre> */}
       {isLogin ? (
         <>
-          <AppFunction setIsLogin={setIsLogin}/>
-          <ProductLists/>
+          <AppFunction setIsLogin={setIsLogin} />
+          <ProductListsPage />
         </>
       ) : (
-        <Login setIsLogin={setIsLogin} />
+        <LoginPage setIsLogin={setIsLogin} />
       )}
     </>
   );
