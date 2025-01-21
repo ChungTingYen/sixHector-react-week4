@@ -162,7 +162,7 @@ const ProductLists = () => {
   };
   const handleDeleteModal = useCallback(
     (productId) => {
-      console.log("handleDeleteModal,productId=", productId);
+      // console.log("handleDeleteModal,productId=", productId);
       const updatedProduct =
         productData.find((product) => product.id === productId) || {};
       setEditProduct(updatedProduct);
