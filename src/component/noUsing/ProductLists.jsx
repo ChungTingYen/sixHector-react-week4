@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 // import axios from "axios";
-import * as apiService from "../apiService/apiService";
-import { Products, ProductDetailModal } from "../component";
-import * as utils from "../utils/utils";
-import { productDataAtLocal } from "../products";
-import { tempProductDefaultValue } from "../defaultValue";
+import * as apiService from "../../apiService/apiService";
+import { Products, ProductDetailModal } from "..";
+import * as utils from "../../utils/utils";
+import { productDataAtLocal } from "../../products";
+import { tempProductDefaultValue } from "../../defaultValue";
 import { Modal } from "bootstrap";
+import { useDebounce } from "@uidotdev/usehooks";
 const APIPath = import.meta.env.VITE_API_PATH;
 
 const ProductLists = () => {
@@ -13,30 +14,79 @@ const ProductLists = () => {
   const [editProduct, setEditProduct] = useState(tempProductDefaultValue);
   const [modalMode, setModalMode] = useState(null);
   const [pageInfo, setPageInfo] = useState({});
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  const [priceAscending, setPriceAscending] = useState(false);
   const editModalDivRef = useRef(null);
   const deleteModalDivRef = useRef(null);
   const appModalRef = useRef(null);
+  const uploadRef = useRef(null);
+
+  const debouncedSearchTerm = useDebounce(category, 1000);
+  const handleSearchCategory = (e) => {
+    setCategory(e.target.value);
+  };
+  const getCategoryProducts = async (query)=>{
+    modalStatus("Desbounce 更新中", null, false);
+    console.log('debounce');
+    try {
+      const headers = utils.getHeadersFromCookie(); 
+      const resProduct =  
+          await apiService.axiosGetProductDataByConfig(  
+            `/api/${APIPath}/admin/products`, 
+            { 
+              params: { 
+                category: query,  
+              },  
+              headers: headers, 
+            } 
+          ); 
+      setProductData(resProduct.data.products);
+    } catch (error) {
+      console.log('error:',error);
+    }
+    appModalRef.current.close();
+  };
+  useEffect(()=>{
+    debouncedSearchTerm ?
+      getCategoryProducts(debouncedSearchTerm)
+      :
+      handleGetProducts();
+    console.log('debouncedSearchTerm=',debouncedSearchTerm);
+  },[debouncedSearchTerm]);
+
   const modalStatus = (imgAlt, modalImg, toggleFooter) => {
-    appModalRef.current.setImgAlt(imgAlt);
+    // appModalRef.current.setImgAlt(imgAlt);
     appModalRef.current.setModalImage(modalImg);
     appModalRef.current.toggleFooter(toggleFooter);
     appModalRef.current.open();
   };
+  const filterData = useMemo(() => {
+    return [...productData]
+      .filter((item) => item.title.match(search))
+      // .sort((a, b) => a.title.localeCompare(b.title))
+      .sort((a, b) => priceAscending && a.price - b.price);
+  }, [productData, search, priceAscending]);
 
+  const handleGetProducts = async ()=>{
+    modalStatus("更新中", null, false);
+    await getProductData();
+    appModalRef.current.close();
+  };
   const getProductData = async (page = 1) => {
     try {
-      const headers = utils.getHeadersFromCookie();
-      const resProduct =
-        (await apiService.axiosGetProductDataByConfig(
-          `/api/${APIPath}/admin/products`,
-          {
-            params: {
-              page: page,
-              category: pageInfo.category,
-            },
-            headers: headers,
-          }
-        )) || [];
+      const headers = utils.getHeadersFromCookie(); 
+      const resProduct =  
+          (await apiService.axiosGetProductDataByConfig(  
+            `/api/${APIPath}/admin/products`, 
+            { 
+              params: { 
+                page: page, 
+                category: pageInfo.category,  
+              },  
+              headers: headers, 
+            } 
+          )); 
       setProductData(resProduct.data.products);
       setPageInfo(resProduct.data.pagination);
     } catch (error) {
@@ -47,9 +97,9 @@ const ProductLists = () => {
 
   const handleOpenEditModalWithValue = useCallback(
     (mode, productId = null) => {
-      // console.log("handleEditModal,mode,productId=", mode, productId);
+      setEditProduct(tempProductDefaultValue);
+      uploadRef.current.value = '';
       if (mode === "create") {
-        setEditProduct(tempProductDefaultValue);
         setModalMode(mode);
       } else if (productId && mode === "edit") {
         const { imagesUrl = [], ...rest } =
@@ -133,16 +183,16 @@ const ProductLists = () => {
       let path = "";
       // const res = null;
       switch (type) {
-        case "create":
-          path = `/api/${APIPath}/admin/product`;
-          await apiService.axiosPostAddProduct(path, wrapData, headers);
-          break;
-        case "edit":
-          path = `/api/${APIPath}/admin/product/${editProduct.id}`;
-          await apiService.axiosPutProduct(path, wrapData, headers);
-          break;
-        default:
-          break;
+      case "create":
+        path = `/api/${APIPath}/admin/product`;
+        await apiService.axiosPostAddProduct(path, wrapData, headers);
+        break;
+      case "edit":
+        path = `/api/${APIPath}/admin/product/${editProduct.id}`;
+        await apiService.axiosPutProduct(path, wrapData, headers);
+        break;
+      default:
+        break;
       }
       return true;
     } catch (error) {
@@ -158,7 +208,6 @@ const ProductLists = () => {
     }
     modalStatus("更新中", null, false);
     try {
-      // const headers = utils.getHeadersFromCookie();
       const result = await implementEditProduct(modalMode, editProduct);
       if (result) {
         getProductData();
@@ -167,15 +216,6 @@ const ProductLists = () => {
       } else {
         alert(modalMode === "create" ? "新增失敗:" : "更新失敗:");
       }
-      // utils.setAxiosConfigRef(axiosConfigRef, pagesRef, "current", headers);
-      // const res = await apiService.axiosGetProductData2(
-      //   `/api/${APIPath}/admin/products`,
-      //   axiosConfigRef.current
-      //  );
-      // const { current_page, total_pages, category } = res.data.pagination;
-      // setProductData(res.data.products);
-      // utils.setPagesRef(pagesRef, { current_page, total_pages, category });
-      // setEditProduct(tempProductDefaultValue);
     } catch (error) {
       alert(modalMode === "create" ? "新增失敗:" : "更新失敗:" + error);
     }
@@ -194,27 +234,16 @@ const ProductLists = () => {
   };
   const deleteProductInModal = async () => {
     if (editProduct?.id === null) return;
-    // modalStatus("刪除中", null, false);
+    modalStatus("刪除中", null, false);
     try {
       const headers = utils.getHeadersFromCookie();
       await apiService.axiosDeleteProduct(
         `/api/${APIPath}/admin/product/${editProduct.id}`,
         headers
       );
-      // utils.setAxiosConfigRef(axiosConfigRef, pagesRef, "current", headers);
-      // const res = await apiService.axiosGetProductData2(
-      //   `/api/${APIPath}/admin/products`,
-      //   axiosConfigRef.current
-      // );
-      // const { current_page, total_pages, category } = res.data.pagination;
-      // if (tempProduct.id === editProduct.id) {
-      //   setTempProduct(null);
-      // }
-      // setProductData(res.data.products);暫時刪除
       setEditProduct(tempProductDefaultValue);
       setModalMode(null);
       getProductData();
-      // utils.setPagesRef(pagesRef, { current_page, total_pages, category });
       alert("刪除產品完成");
     } catch (error) {
       console.error("刪除產品時發生錯誤：", error);
@@ -232,6 +261,7 @@ const ProductLists = () => {
   };
   //上傳內建資料隨機一項產品
   const handleAddProduct = async () => {
+    modalStatus("更新中", null, false);
     const productIndex = parseInt(Date.now()) % productDataAtLocal.length;
     const wrapData = {
       data: productDataAtLocal[productIndex],
@@ -249,8 +279,9 @@ const ProductLists = () => {
       alert(error.response.data.message);
       console.log(error);
     }
+    appModalRef.current.close();
   };
-  //上傳全部內建資料產品，先留著
+  //上傳全部內建資料產品
   const handleAddAllProducts = async () => {
     modalStatus("上傳中", null, false);
     const results = await utils.AddProductsSequentially(productDataAtLocal);
@@ -259,9 +290,37 @@ const ProductLists = () => {
     if (results.length > 0) alert(results.join(","));
     appModalRef.current.close();
   };
+  //刪除第一頁全部產品
+  const handleDeleteAllProducts = async () => {
+    modalStatus("刪除中", null, false);
+    if (productData.length > 0) {
+      const results = await utils.deleteProductsSequentially(productData);
+      // utils.getProductData(headers, setProductData, pagesRef);
+      setEditProduct(tempProductDefaultValue);
+      if (results.length > 0) alert(results.join(","));
+      getProductData();
+    }
+    appModalRef.current.close();
+  };
   const handlePageChange = (page) => {
     getProductData(page);
   };
+
+  const handleImgUpload = async(e)=>{
+    modalStatus("上傳中", null, false);
+    try {
+      const headers = utils.getHeadersFromCookie();
+      const formData = new FormData();
+      formData.append('file-to-upload',e.target.files[0]);
+      const result = await apiService.axiosPostImg( `/api/${APIPath}/admin/upload`,formData,headers);
+      result?.data?.success && setEditProduct({ ...editProduct,imageUrl:result.data.imageUrl });
+    } catch (error) {
+      alert('上傳主圖錯誤:' + error);
+      console.log(error);
+    }
+    appModalRef.current.close();
+  };
+
   useEffect(() => {
     getProductData();
   }, []);
@@ -273,9 +332,7 @@ const ProductLists = () => {
       new Modal(deleteModalDivRef.current, { backdrop: false });
     }
   }, []);
-  useEffect(() => {
-    // console.log("page=", pageInfo);
-  });
+
   return (
     <>
       <div className="row mt-1 mb-2 mx-1">
@@ -284,162 +341,93 @@ const ProductLists = () => {
             <h3>內層功能</h3>
             <button
               type="button"
-              className="btn btn-warning mx-2"
-              onClick={getProductData}
+              className="btn btn-warning mx-1"
+              onClick={handleGetProducts}
             >
               更新產品清單
             </button>
             <button
               type="button"
-              className="btn btn-info mx-2"
+              className="btn btn-info mx-1"
               onClick={handleAddAllProducts}
             >
               上傳全部內建資料產品
             </button>
             <button
               type="button"
-              className="btn btn-info mx-2"
+              className="btn btn-info mx-1"
               onClick={handleAddProduct}
             >
               上傳內建資料隨機一項產品
             </button>
+            <button
+              type="button"
+              className="btn btn-danger mx-1"
+              onClick={handleDeleteAllProducts}
+            >
+              刪除第一頁全部產品
+            </button>
           </div>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => handleOpenEditModalWithValue("create")}
-          >
+          <div className="d-flex align-items-center mb-2">
+            <button
+              type="button"
+              className="btn btn-primary mx-1"
+              onClick={() => handleOpenEditModalWithValue("create")}
+            >
             建立新的產品
-          </button>
-          {/* <button
-            type="button"
-            className="btn btn-warning me-2"
-            onClick={handleCheckLogin}
-          >
-            檢查登入狀態
-          </button> */}
-          {/* <button
-            type="button"
-            className="btn btn-success me-2"
-            onClick={handleAddProduct}
-          >
-            上傳內建資料隨機一項產品
-          </button> */}
-          {/* <button
-            type="button"
-            className="btn btn-success me-2"
-            onClick={handleAddAllProducts}
-          >
-            上傳全部內建資料產品
-          </button> */}
-          {/* <button
-            type="button"
-            className="btn btn-secondary me-2"
-            onClick={handleGetProducts}
-          >
-            重新取得產品資料
-          </button> */}
-          {/* <button
-            type="button"
-            className="btn btn-secondary me-2"
-            onClick={() => handleGetUpDownPageProducts("up")}
-          >
-            上一頁
-          </button> */}
-          {/* <button
-            type="button"
-            className="btn btn-secondary me-2"
-            onClick={() => handleGetUpDownPageProducts("down")}
-          >
-            下一頁
-          </button> */}
-          {/* <button
-            type="button"
-            className="btn btn-danger me-2"
-            onClick={handleDeleteAllProducts}
-          >
-            刪除本頁全部產品
-          </button> */}
-          {/* <button
-            type="button"
-            className="btn btn-warning me-2"
-            onClick={handleLogout}
-          >
-            登出
-          </button> */}
+            </button>
+          </div>
         </div>
-        {/* <div className="d-flex align-items-center mt-3">
-          <div className="me-3">
-            搜尋名稱:
+        <div className="d-flex align-items-center mt-2">
+          <div className="">
+            搜尋此頁商品名稱:
             <input
               type="search"
               style={{ width: "100px" }}
               onChange={(e) => {
                 setSearch(e.target.value);
               }}
+              value={search}
             />
+            <button type='button' className="btn btn-secondary mx-1" 
+              onClick={()=>setSearch('')}>清除</button>
           </div>
-          <div className="me-3">
+          <div className="me-2 mx-1">
             價格排序:
             <input
               type="checkbox"
               checked={priceAscending}
               onChange={(e) => setPriceAscending(e.target.checked)}
+              className="mx-1 form-check-input"
             />
             {priceAscending.toString()}
           </div>
-        </div> */}
+          <div className="me-2 mx-1 ms-5">
+            測試Desbounce for category:
+            <input
+              type="search"
+              style={{ width: "200px" }}
+              className="mx-1"
+              onChange={handleSearchCategory}
+              value={category}
+            />
+            <button type='button' className="btn btn-secondary mx-1" 
+              onClick={(e)=>handleSearchCategory(e)}>清除</button>
+          </div>
+        </div>
+       
       </div>
       {productData.length > 0 ? (
         <>
-          {/* <div className="row mb-1">
-           <h1>
-              本頁產品數:{productData.length}, {pagesRef.current.current_page}/
-              {pagesRef.current.total_pages} 頁{" "}
-            </h1> 
-          </div>*/}
           <div className="row mt-1 mb-2 mx-1">
-            {/* <div className="d-flex justify-content-between">
-              <div className="d-flex align-items-center mb-2">
-                <h3>內層功能</h3>
-                <button
-                  type="button"
-                  className="btn btn-warning mx-2"
-                  onClick={getProductData}
-                >
-                  更新產品清單
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-info mx-2"
-                  onClick={handleAddAllProducts}
-                >
-                  上傳全部內建資料產品
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-info mx-2"
-                  onClick={handleAddProduct}
-                >
-                  上傳內建資料隨機一項產品
-                </button>
-              </div>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => handleOpenEditModalWithValue("create")}
-              >
-                建立新的產品
-              </button>
-            </div> */}
             <div>
-              {/* <p onClick={ShowNextPage}>第二頁</p> */}
               <h3>產品列表</h3>
               <table className="table">
                 <thead>
                   <tr>
                     <th style={{ width: "10%" }}>index</th>
                     <th style={{ width: "20%" }}>產品名稱</th>
+                    <th>類別</th>
                     <th>原價</th>
                     <th>售價</th>
                     <th style={{ width: "10%" }}>啟用</th>
@@ -449,8 +437,8 @@ const ProductLists = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* {filterData.map((product, index) => { */}
-                  {productData.map((product, index) => {
+                  {filterData.map((product, index) => {
+                  // {productData.map((product, index) => {
                     return (
                       <Products
                         key={product.id}
@@ -488,22 +476,20 @@ const ProductLists = () => {
                   {Array.from({ length: pageInfo.total_pages }).map(
                     (_, index) => {
                       return (
-                        <>
-                          <li
-                            className={`page-item ${
-                              pageInfo.current_page === index + 1 && "active"
-                            } `}
-                            key={index + 1}
+                        <li
+                          className={`page-item ${
+                            pageInfo.current_page === index + 1 && "active"
+                          } `}
+                          key={index + 1}
+                        >
+                          <a
+                            className="page-link"
+                            onClick={() => handlePageChange(index + 1)}
+                            href="#"
                           >
-                            <a
-                              className="page-link"
-                              onClick={() => handlePageChange(index + 1)}
-                              href="#"
-                            >
-                              {index + 1}
-                            </a>
-                          </li>
-                        </>
+                            {index + 1}
+                          </a>
+                        </li>
                       );
                     }
                   )}
@@ -670,6 +656,17 @@ const ProductLists = () => {
             <div className="modal-body p-4">
               <div className="row g-4">
                 <div className="col-12 ">
+                  <div className="mb-3">
+                    <label htmlFor="fileInput" className="form-label"> 主圖上傳 </label>
+                    <input
+                      type="file"
+                      accept=".jpg,.jpeg,.png"
+                      className="form-control"
+                      id="fileInput"
+                      onChange={handleImgUpload}
+                      ref={uploadRef}
+                    />
+                  </div>
                   <label htmlFor="primary-image" className="form-label">
                     主圖
                   </label>
@@ -747,13 +744,13 @@ const ProductLists = () => {
                 {editProduct.imagesUrl.length < 5 &&
                   editProduct.imagesUrl[editProduct.imagesUrl.length - 1] !==
                     "" && (
-                    <button
-                      className="btn btn-outline-primary btn-sm w-50"
-                      onClick={(e) => handleAddImage(e.target.value)}
-                    >
+                  <button
+                    className="btn btn-outline-primary btn-sm w-50"
+                    onClick={(e) => handleAddImage(e.target.value)}
+                  >
                       新增圖片
-                    </button>
-                  )}
+                  </button>
+                )}
                 {editProduct.imagesUrl.length > 1 && (
                   <button
                     className="btn btn-outline-danger btn-sm w-50"

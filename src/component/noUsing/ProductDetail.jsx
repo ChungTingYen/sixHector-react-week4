@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import React, { useRef, useState, memo } from "react";
-import Modal1 from "./ProductDetailModal";
+import Modal1 from "../ProductDetailModal";
 const ProductDetail = (props) => {
   const {
     title,

@@ -12,6 +12,7 @@ const Product = (props) => {
     is_enabled,
     // onGetProduct,
     // onDeleteProduct,
+    category,
     isSelected,
     handleOpenEditModalWithValue,
     handleDeleteModal,
@@ -35,6 +36,7 @@ const Product = (props) => {
         <tr className={isSelected ? "table-info" : ""} id={id}>
           <th scope="row">{index} </th>
           <th scope="row">{title}</th>
+          <th>{category}</th>
           {/* <td>{title}</td> */}
           <td>{origin_price}</td>
           <td>{price}</td>

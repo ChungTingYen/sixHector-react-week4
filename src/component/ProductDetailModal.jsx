@@ -5,7 +5,6 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
-  useState,
 } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal } from "bootstrap";
@@ -26,13 +25,9 @@ const ProductDetailModal = forwardRef((props, ref) => {
     modalRef1.current = new Modal(modalDivRef1.current);
   }, []);
   const closeModal = () => {
-    // const modalInstance = Modal.getInstance(modalDivRef1.current);
-    // modalInstance.hide();
     modalRef1.current.hide();
   };
   const openModal = () => {
-    // const modalInstance = Modal.getInstance(modalDivRef1.current);
-    // modalInstance.show();
     modalRef1.current.show();
   };
 
@@ -114,7 +109,7 @@ const ProductDetailModal = forwardRef((props, ref) => {
                 // src={imageSrc}
                 ref={imageRef}
                 className="img-fluid"
-                alt=""
+                alt="進行中"
                 style={{ maxWidth: "100%", maxHeight: "100%" }}
                 id="picture"
               />

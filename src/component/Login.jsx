@@ -28,11 +28,6 @@ const Login = (props) => {
         //執行axios.defaults.headers.common.Authorization
         // axios.defaults.headers.common.Authorization = token;
         setIsLogin(true);
-        // const nowHeaders = {
-        //   Authorization: token,
-        // };
-        // setHeaders(nowHeaders);
-        // utils.getProductData(nowHeaders, setProductData, pagesRef);
       }
     } catch (error) {
       alert("error:", error);
@@ -46,7 +41,6 @@ const Login = (props) => {
       await apiService.axiosPostCheckSingin("/api/user/check", headers);
       setIsLogin(true);
     } catch (error) {
-      // alert("error123:",  error);
       console.log(error);
     }
   };

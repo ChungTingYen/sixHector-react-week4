@@ -45,3 +45,7 @@ export const axiosPutProduct = async(path,putData,config)=>{
   return response;
 };
 
+export const axiosPostImg = async(path,putData,config)=>{
+  const response = await adminInstance.post(path,putData,{ headers: config });
+  return response;
+};
