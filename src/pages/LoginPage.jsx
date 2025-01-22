@@ -1,11 +1,12 @@
-/* eslint-disable react/prop-types */
+ 
 // import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, } from "react";
+import { useLogin } from "../component/LoginContext";
 import * as apiService from "../apiService/apiService";
 import * as utils from "../utils/utils";
 
-const Login = (props) => {
-  const { setIsLogin } = props;
+const Login = () => {
+  const { setIsLogin } = useLogin();
   const [account, setAccount] = useState({
     username: "",
     password: "",

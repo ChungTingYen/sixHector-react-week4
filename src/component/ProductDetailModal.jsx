@@ -84,7 +84,6 @@ const ProductDetailModal = forwardRef((props, ref) => {
       >
         <div
           className="modal-dialog"
-          // style={{ width: "600px", height: "600px" }}
           style={modalSize}
         >
           <div className="modal-content">

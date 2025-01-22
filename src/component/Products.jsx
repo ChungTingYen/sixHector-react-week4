@@ -10,14 +10,15 @@ const Product = (props) => {
     origin_price,
     price,
     is_enabled,
+    //第二周功能
     // onGetProduct,
     // onDeleteProduct,
     category,
     isSelected,
     handleOpenEditModalWithValue,
     handleDeleteModal,
-    
   } = props;
+  //第二周功能
   // const atGetProduct = () => {
   //   onGetProduct(id);
   // };
@@ -42,7 +43,7 @@ const Product = (props) => {
           <td>{price}</td>
           <td>
             <span className={!is_enabled ? "text-danger fw-bold fs-4" : ""}>
-              {is_enabled ? "Y" : "N"}
+              {is_enabled ? "啟用" : "未啟用"}
             </span>
           </td>
           {/* <td> 第二周功能

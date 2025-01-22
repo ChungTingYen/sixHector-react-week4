@@ -1,40 +1,42 @@
+ 
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
-import { Modal } from "bootstrap";
-// import axios from "axios";
+import { useLogin } from "../component/LoginContext";
 import * as apiService from "../apiService/apiService";
 import * as utils from "../utils/utils";
 import { productDataAtLocal } from "../data/products";
 import { tempProductDefaultValue } from "../data/defaultValue";
 import {
   Products,
-  ProductDetailModal,
   Pagination,
-  ProductModal,
+  ProductDetailModal,
+  ProductEditModal,
+  ProductDeleteModal,
+  AppFunction
 } from "../component";
 import { useDebounce } from "@uidotdev/usehooks";
 const APIPath = import.meta.env.VITE_API_PATH;
 
 const ProductLists = () => {
+  const { setIsLogin } = useLogin();
   const [productData, setProductData] = useState([]);
   const [editProduct, setEditProduct] = useState(tempProductDefaultValue);
   const [modalMode, setModalMode] = useState(null);
   const [pageInfo, setPageInfo] = useState({});
+  //自已測試
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [priceAscending, setPriceAscending] = useState(false);
-  const editModalDivRef = useRef(null);
-  const deleteModalDivRef = useRef(null);
-  const appModalRef = useRef(null);
-  const uploadRef = useRef(null);
+  //
+  const ProductDetailModalRef = useRef(null);
 
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
-
+  const [isProductEditModalOpen, setIsProductEditModalOpen] = useState(false);
+  const [isProductDeleteModalOpen, setIsProductDeleteModalOpen] = useState(false);
   const debouncedSearchTerm = useDebounce(category, 1000);
   const handleSearchCategory = (e) => {
     setCategory(e.target.value);
   };
   const getCategoryProducts = async (query) => {
-    modalStatus("Desbounce 更新中", null, false);
+    utils.modalStatus(ProductDetailModalRef,"ProductListPage Desbounce 進行中", null, false);
     console.log("debounce");
     try {
       const headers = utils.getHeadersFromCookie();
@@ -51,7 +53,7 @@ const ProductLists = () => {
     } catch (error) {
       console.log("error:", error);
     }
-    appModalRef.current.close();
+    ProductDetailModalRef.current.close();
   };
   useEffect(() => {
     debouncedSearchTerm
@@ -60,12 +62,6 @@ const ProductLists = () => {
     console.log("debouncedSearchTerm=", debouncedSearchTerm);
   }, [debouncedSearchTerm]);
 
-  const modalStatus = (imgAlt, modalImg, toggleFooter) => {
-    // appModalRef.current.setImgAlt(imgAlt);
-    appModalRef.current.setModalImage(modalImg);
-    appModalRef.current.toggleFooter(toggleFooter);
-    appModalRef.current.open();
-  };
   const filterData = useMemo(() => {
     return (
       [...productData]
@@ -76,11 +72,11 @@ const ProductLists = () => {
   }, [productData, search, priceAscending]);
 
   const handleGetProducts = async () => {
-    modalStatus("更新中", null, false);
+    utils.modalStatus(ProductDetailModalRef,"ProductListPage 載入中", null, false);
     await getProductData();
-    appModalRef.current.close();
+    ProductDetailModalRef.current.close();
   };
-  const getProductData = async (page = 1) => {
+  const getProductData = useCallback(async (page = 1) => {
     try {
       const headers = utils.getHeadersFromCookie();
       const resProduct = await apiService.axiosGetProductDataByConfig(
@@ -99,13 +95,20 @@ const ProductLists = () => {
       alert(error.response.data.message);
       console.log(error);
     }
-  };
-
+  },[setProductData,pageInfo,setPageInfo]);
+  const handleDeleteModal = useCallback(
+    (productId) => {
+      const updatedProduct =
+        productData.find((product) => product.id === productId) || {};
+      setEditProduct(updatedProduct);
+      setIsProductDeleteModalOpen(true);
+    },
+    [productData]
+  );
   const handleOpenEditModalWithValue = useCallback(
     (mode, productId = null) => {
-      setEditProduct(tempProductDefaultValue);
-      // uploadRef.current.value = "";
       if (mode === "create") {
+        setEditProduct(tempProductDefaultValue);
         setModalMode(mode);
       } else if (productId && mode === "edit") {
         const { imagesUrl = [], ...rest } =
@@ -119,156 +122,14 @@ const ProductLists = () => {
         setEditProduct(updatedProduct);
         setModalMode(mode);
       }
-      setIsProductModalOpen(true);
-      // openEditModal();
+      setIsProductEditModalOpen(true);
     },
     [productData]
   );
-  // const openEditModal = () => {
-  //   const modalInstance = Modal.getInstance(editModalDivRef.current);
-  //   modalInstance.show();
-  // };
-  // const closeEditModal = () => {
-  //   setModalMode(null);
-  //   setEditProduct(tempProductDefaultValue);
-  //   const modalInstance = Modal.getInstance(editModalDivRef.current);
-  //   modalInstance.hide();
-  // };
 
-  // const handleEditDataChange = (e) => {
-  //   const { name, type, value, checked } = e.target;
-  //   let tempValue;
-  //   if (type === "number") tempValue = Number(value);
-  //   else if (type === "checkbox") tempValue = checked;
-  //   else tempValue = value;
-  //   const temp = {
-  //     ...editProduct,
-  //     [name]: tempValue,
-  //   };
-  //   setEditProduct(temp);
-  // };
-  // const handleImgsUrlChange = useCallback(
-  //   (e, index) => {
-  //     // console.log(e.target);
-  //     const { value } = e.target;
-  //     const newImageUrl = [...editProduct.imagesUrl];
-  //     newImageUrl[index] = value;
-  //     setEditProduct((prev) => ({ ...prev, imagesUrl: newImageUrl }));
-  //   },
-  //   [editProduct]
-  // );
-  // const handleAddImage = () => {
-  //   const newImageUrl = [...editProduct.imagesUrl];
-  //   newImageUrl.push("");
-  //   setEditProduct((prev) => ({ ...prev, imagesUrl: newImageUrl }));
-  // };
-  // const handleRemoveImage = () => {
-  //   const newImageUrl = [...editProduct.imagesUrl];
-  //   newImageUrl.pop();
-  //   setEditProduct((prev) => ({ ...prev, imagesUrl: newImageUrl }));
-  // };
-  const handleDeleteModal = useCallback(
-    (productId) => {
-      // console.log("handleDeleteModal,productId=", productId);
-      const updatedProduct =
-        productData.find((product) => product.id === productId) || {};
-      setEditProduct(updatedProduct);
-      openDeleteModal();
-    },
-    [productData]
-  );
-  // const implementEditProduct = async (type, editProduct) => {
-  //   try {
-  //     const headers = utils.getHeadersFromCookie();
-  //     const wrapData = {
-  //       data: {
-  //         ...editProduct,
-  //         is_enabled: editProduct.is_enabled ? 1 : 0,
-  //         //price,original_price在取得輸入資料時handleEditDataChange已處理過
-  //       },
-  //     };
-  //     let path = "";
-  //     // const res = null;
-  //     switch (type) {
-  //       case "create":
-  //         path = `/api/${APIPath}/admin/product`;
-  //         await apiService.axiosPostAddProduct(path, wrapData, headers);
-  //         break;
-  //       case "edit":
-  //         path = `/api/${APIPath}/admin/product/${editProduct.id}`;
-  //         await apiService.axiosPutProduct(path, wrapData, headers);
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //     return true;
-  //   } catch (error) {
-  //     console.log(error);
-  //     return false;
-  //     // alert("上傳失敗");
-  //   }
-  // };
-  // const handleUpdateProduct = async () => {
-  //   if (!editProduct.id && modalMode === "edit") {
-  //     alert("未取得product ID");
-  //     return;
-  //   }
-  //   modalStatus("更新中", null, false);
-  //   try {
-  //     const result = await implementEditProduct(modalMode, editProduct);
-  //     if (result) {
-  //       getProductData();
-  //       setEditProduct(tempProductDefaultValue);
-  //       alert(modalMode === "create" ? "新增完成" : "更新完成");
-  //     } else {
-  //       alert(modalMode === "create" ? "新增失敗:" : "更新失敗:");
-  //     }
-  //   } catch (error) {
-  //     alert(modalMode === "create" ? "新增失敗:" : "更新失敗:" + error);
-  //   }
-  //   appModalRef.current.close();
-  //   closeEditModal();
-  // };
-  const openDeleteModal = () => {
-    const modalInstance = Modal.getInstance(deleteModalDivRef.current);
-    modalInstance.show();
-  };
-  const closeDeleteModal = () => {
-    const modalInstance = Modal.getInstance(deleteModalDivRef.current);
-    modalInstance.hide();
-    setEditProduct(tempProductDefaultValue);
-    setModalMode(null);
-  };
-  const deleteProductInModal = async () => {
-    if (editProduct?.id === null) return;
-    modalStatus("刪除中", null, false);
-    try {
-      const headers = utils.getHeadersFromCookie();
-      await apiService.axiosDeleteProduct(
-        `/api/${APIPath}/admin/product/${editProduct.id}`,
-        headers
-      );
-      setEditProduct(tempProductDefaultValue);
-      setModalMode(null);
-      getProductData();
-      alert("刪除產品完成");
-    } catch (error) {
-      console.error("刪除產品時發生錯誤：", error);
-      alert("刪除產品時發生錯誤：", error);
-    }
-    appModalRef.current.close();
-    closeDeleteModal();
-  };
-  // const handleImgToMaster = (e, imgsIndex) => {
-  //   const temp = editProduct.imagesUrl.map((item, index) =>
-  //     index === imgsIndex ? editProduct.imageUrl : item
-  //   );
-  //   const tt = { ...editProduct, imagesUrl: temp, imageUrl: e.target.src };
-  //   setEditProduct(tt);
-  // };
   //上傳內建資料隨機一項產品
   const handleAddProduct = async () => {
-    modalStatus("更新中", null, false);
+    utils.modalStatus(ProductDetailModalRef,"ProductListPage 建立中", null, false);
     const productIndex = parseInt(Date.now()) % productDataAtLocal.length;
     const wrapData = {
       data: productDataAtLocal[productIndex],
@@ -286,64 +147,36 @@ const ProductLists = () => {
       alert(error.response.data.message);
       console.log(error);
     }
-    appModalRef.current.close();
+    ProductDetailModalRef.current.close();
   };
   //上傳全部內建資料產品
   const handleAddAllProducts = async () => {
-    modalStatus("上傳中", null, false);
+    utils.modalStatus(ProductDetailModalRef,"ProductListPage 上傳中", null, false);
     const results = await utils.AddProductsSequentially(productDataAtLocal);
-    !results.length && getProductData();
     setEditProduct(tempProductDefaultValue);
-    if (results.length > 0) alert(results.join(","));
-    appModalRef.current.close();
+    !results.length ? alert('上傳成功') : alert(results.join(","));
+    !results.length && getProductData();
+    ProductDetailModalRef.current.close();
   };
   //刪除第一頁全部產品
   const handleDeleteAllProducts = async () => {
-    modalStatus("刪除中", null, false);
+    utils.modalStatus(ProductDetailModalRef,"ProductListPage 刪除中", null, false);
     if (productData.length > 0) {
       const results = await utils.deleteProductsSequentially(productData);
-      // utils.getProductData(headers, setProductData, pagesRef);
       setEditProduct(tempProductDefaultValue);
-      if (results.length > 0) alert(results.join(","));
+      !results.length ? alert('刪除成功') : alert(results.join(","));
       getProductData();
     }
-    appModalRef.current.close();
+    ProductDetailModalRef.current.close();
   };
-
-  // const handleImgUpload = async (e) => {
-  //   modalStatus("上傳中", null, false);
-  //   try {
-  //     const headers = utils.getHeadersFromCookie();
-  //     const formData = new FormData();
-  //     formData.append("file-to-upload", e.target.files[0]);
-  //     const result = await apiService.axiosPostImg(
-  //       `/api/${APIPath}/admin/upload`,
-  //       formData,
-  //       headers
-  //     );
-  //     result?.data?.success &&
-  //       setEditProduct({ ...editProduct, imageUrl: result.data.imageUrl });
-  //   } catch (error) {
-  //     alert("上傳主圖錯誤:" + error);
-  //     console.log(error);
-  //   }
-  //   appModalRef.current.close();
-  // };
 
   useEffect(() => {
     getProductData();
   }, []);
-  useEffect(() => {
-    if (editModalDivRef.current) {
-      new Modal(editModalDivRef.current, { backdrop: false });
-    }
-    // if (deleteModalDivRef.current) {
-    //   new Modal(deleteModalDivRef.current, { backdrop: false });
-    // }
-  }, []);
 
   return (
     <>
+      <AppFunction setIsLogin={setIsLogin} />
       <div className="row mt-1 mb-2 mx-1">
         <div className="d-flex justify-content-between">
           <div className="d-flex align-items-center mb-2">
@@ -414,7 +247,7 @@ const ProductLists = () => {
               onChange={(e) => setPriceAscending(e.target.checked)}
               className="mx-1 form-check-input"
             />
-            {priceAscending.toString()}
+            {/* {priceAscending.toString()} */}
           </div>
           <div className="me-2 mx-1 ms-5">
             測試Desbounce for category:
@@ -466,9 +299,6 @@ const ProductLists = () => {
                         handleOpenEditModalWithValue={
                           handleOpenEditModalWithValue
                         }
-                        // onGetProduct={onGetProduct}
-                        // onDeleteProduct={onDeleteProduct}
-                        // isSelected={product.id === selectedRowIndex}
                       />
                     );
                   })}
@@ -481,333 +311,29 @@ const ProductLists = () => {
       ) : (
         <h1>沒有商品或商品載入中</h1>
       )}
-      {/* <div
-        id="productModal"
-        className="modal fade"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 1050 }}
-        ref={editModalDivRef}
-      >
-        <div className="modal-dialog modal-dialog-centered modal-xl">
-          <div className="modal-content border-0 shadow">
-            <div className="modal-header border-bottom">
-              <h5 className="modal-title fs-4">{editProduct.title}</h5>
-              <button
-                type="button"
-                className="btn-close"
-                aria-label="Close"
-                onClick={closeEditModal}
-                // data-bs-dismiss="modal"
-              ></button>
-            </div>
-            <div className="modal-body p-4">
-              <div className="row g-4">
-                <div className="col-md-12">
-                  <div className="mb-3">
-                    <label htmlFor="title" className="form-label">
-                      標題
-                    </label>
-                    <input
-                      name="title"
-                      id="title"
-                      type="text"
-                      className="form-control"
-                      placeholder="請輸入標題"
-                      value={editProduct.title}
-                      onChange={handleEditDataChange}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="category" className="form-label">
-                      分類
-                    </label>
-                    <input
-                      name="category"
-                      id="category"
-                      type="text"
-                      className="form-control"
-                      placeholder="請輸入分類"
-                      value={editProduct.category}
-                      onChange={handleEditDataChange}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="unit" className="form-label">
-                      單位
-                    </label>
-                    <input
-                      name="unit"
-                      id="unit"
-                      type="text"
-                      className="form-control"
-                      placeholder="請輸入單位"
-                      value={editProduct.unit}
-                      onChange={handleEditDataChange}
-                    />
-                  </div>
-                  <div className="row g-3 mb-3">
-                    <div className="col-6">
-                      <label htmlFor="origin_price" className="form-label">
-                        原價
-                      </label>
-                      <input
-                        name="origin_price"
-                        id="origin_price"
-                        type="number"
-                        className="form-control"
-                        placeholder="請輸入原價"
-                        min={0}
-                        value={editProduct.origin_price}
-                        onChange={handleEditDataChange}
-                      />
-                    </div>
-                    <div className="col-6">
-                      <label htmlFor="price" className="form-label">
-                        售價
-                      </label>
-                      <input
-                        name="price"
-                        id="price"
-                        type="number"
-                        className="form-control"
-                        placeholder="請輸入售價"
-                        min={0}
-                        value={editProduct.price}
-                        onChange={handleEditDataChange}
-                      />
-                    </div>
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="description" className="form-label">
-                      產品描述
-                    </label>
-                    <textarea
-                      name="description"
-                      id="description"
-                      className="form-control"
-                      rows={4}
-                      placeholder="請輸入產品描述"
-                      value={editProduct.description}
-                      onChange={handleEditDataChange}
-                    ></textarea>
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="content" className="form-label">
-                      說明內容
-                    </label>
-                    <textarea
-                      name="content"
-                      id="content"
-                      className="form-control"
-                      rows={4}
-                      placeholder="請輸入說明內容"
-                      value={editProduct.content}
-                      onChange={handleEditDataChange}
-                    ></textarea>
-                  </div>
-                  <div className="form-check">
-                    <input
-                      name="is_enabled"
-                      type="checkbox"
-                      className="form-check-input"
-                      id="isEnabled"
-                      checked={editProduct.is_enabled}
-                      onChange={handleEditDataChange}
-                    />
-                    <label className="form-check-label" htmlFor="isEnabled">
-                      是否啟用
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="modal-body p-4">
-              <div className="row g-4">
-                <div className="col-12 ">
-                  <div className="mb-3">
-                    <label htmlFor="fileInput" className="form-label">
-                      {" "}
-                      主圖上傳{" "}
-                    </label>
-                    <input
-                      type="file"
-                      accept=".jpg,.jpeg,.png"
-                      className="form-control"
-                      id="fileInput"
-                      onChange={handleImgUpload}
-                      ref={uploadRef}
-                    />
-                  </div>
-                  <label htmlFor="primary-image" className="form-label">
-                    主圖
-                  </label>
-                  <div className="input-group">
-                    <input
-                      name="imageUrl"
-                      type="text"
-                      id="primary-image"
-                      className="form-control"
-                      placeholder="請輸入圖片連結"
-                      value={editProduct.imageUrl}
-                      onChange={handleEditDataChange}
-                    />
-                  </div>
-                  <div style={{ width: "100%", height: "500px" }}>
-                    <img
-                      src={editProduct.imageUrl}
-                      alt={editProduct.title}
-                      className="img-fluid"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </div>
-                </div>
-                {editProduct.imagesUrl.map((image, index) => (
-                  <div key={index} className="col-md-6 mb-1">
-                    <label
-                      htmlFor={`imagesUrl-${index + 1}`}
-                      className="form-label"
-                    >
-                      副圖 {index + 1}
-                    </label>
-                    <input
-                      id={`imagesUrl-${index + 1}`}
-                      type="text"
-                      placeholder={`圖片網址 ${index + 1}`}
-                      className="form-control mb-2"
-                      value={image}
-                      onChange={(e) => handleImgsUrlChange(e, index)}
-                      name={`imagesUrl-${index + 1}`}
-                    />
-                    <div
-                      style={{
-                        width: "100%",
-                        height: "200px",
-                        overflow: "hidden",
-                        position: "relative",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {image && (
-                        <img
-                          src={image}
-                          alt={`副圖 ${index + 1}`}
-                          className="img-fluid"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                          onClick={(e) => handleImgToMaster(e, index)}
-                        />
-                      )}
-                    </div>
-                    <hr />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="d-flex justify-content-end">
-              <div className="btn-group w-100">
-                {editProduct.imagesUrl.length < 5 &&
-                  editProduct.imagesUrl[editProduct.imagesUrl.length - 1] !==
-                    "" && (
-                    <button
-                      className="btn btn-outline-primary btn-sm w-50"
-                      onClick={(e) => handleAddImage(e.target.value)}
-                    >
-                      新增圖片
-                    </button>
-                  )}
-                {editProduct.imagesUrl.length > 1 && (
-                  <button
-                    className="btn btn-outline-danger btn-sm w-50"
-                    onClick={(e) => handleRemoveImage(e.target.value)}
-                  >
-                    取消最後尾圖片
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className="modal-footer border-top bg-light">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                aria-label="Close"
-                onClick={closeEditModal}
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleUpdateProduct}
-              >
-                確認
-              </button>
-            </div>
-          </div>
-        </div>
-      </div> */}
-      <ProductModal
-        setEditProduct={setEditProduct}
+      <ProductEditModal
         editProduct={editProduct}
         setModalMode={setModalMode}
         modalMode={modalMode}
-        modalStatus={modalMode}
         getProductData={getProductData}
-        isProductModalOpen={isProductModalOpen}
-        setIsProductModalOpen={setIsProductModalOpen}
-        // ref={uploadRef}
+        isProductEditModalOpen={isProductEditModalOpen}
+        setIsProductEditModalOpen={setIsProductEditModalOpen}
       />
-      <div
-        className="modal fade"
-        id="delProductModal"
-        tabIndex="-1"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        ref={deleteModalDivRef}
-      >
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5">刪除產品</h1>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              你是否要刪除
-              <span className="text-danger fw-bold">{editProduct.title}</span>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={closeDeleteModal}
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={deleteProductInModal}
-              >
-                刪除
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+
+      <ProductDeleteModal 
+        setModalMode={setModalMode}
+        modalMode={modalMode}
+        getProductData={getProductData}
+        isProductDeleteModalOpen={isProductDeleteModalOpen}
+        setIsProductDeleteModalOpen={setIsProductDeleteModalOpen}
+        editProduct={editProduct}
+      />
+
       <ProductDetailModal
-        ref={appModalRef}
+        ref={ProductDetailModalRef}
         modalBodyText="訊息"
-        modalSize={{ width: "200px", height: "200px" }}
-        modalImgSize={{ width: "200px", height: "120px" }}
+        modalSize={{ width: "300px", height: "200px" }}
+        modalImgSize={{ width: "300px", height: "120px" }}
       />
     </>
   );

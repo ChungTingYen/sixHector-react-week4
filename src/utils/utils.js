@@ -123,3 +123,10 @@ export const setPagesRef = (pagesRef,config)=>{
     category: config.category || "",
   };
 };
+
+export const modalStatus = (appModalRef,imgAlt, modalImg, toggleFooter) => {
+  appModalRef.current.setImgAlt(imgAlt);
+  appModalRef.current.setModalImage(modalImg);
+  appModalRef.current.toggleFooter(toggleFooter);
+  appModalRef.current.open();
+};

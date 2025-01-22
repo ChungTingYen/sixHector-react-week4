@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-import React from "react";
 import * as apiService from "../apiService/apiService";
 import * as utils from "../utils/utils";
 const AppFunction = (props) => {

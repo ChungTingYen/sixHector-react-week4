@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { memo } from 'react';
 const Pagination = (props) => {
   const { getProductData, pageInfo } = props;
   const handlePageChange = (page) => {
@@ -52,4 +53,4 @@ const Pagination = (props) => {
   );
 };
 
-export default Pagination;
+export default memo(Pagination);
