@@ -17,6 +17,7 @@ const Product = (props) => {
     isSelected,
     handleOpenEditModalWithValue,
     handleDeleteModal,
+    buyerNumber
   } = props;
   //第二周功能
   // const atGetProduct = () => {
@@ -46,6 +47,7 @@ const Product = (props) => {
               {is_enabled ? "啟用" : "未啟用"}
             </span>
           </td>
+         
           {/* <td> 第二周功能
             <button
               type="button"
@@ -82,6 +84,7 @@ const Product = (props) => {
               </button>
             </div>
           </td>
+          <td>{buyerNumber}</td>
         </tr>
       }
     </>

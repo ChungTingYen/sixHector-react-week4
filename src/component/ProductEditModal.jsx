@@ -74,7 +74,7 @@ const ProductModal = (props) => {
     modalInstance.show();
   };
   const handleImgUpload = async (e) => {
-    utils.modalStatus(ProductDetailModalRef.current,"進行中", null, false);
+    utils.modalStatus(ProductDetailModalRef,"進行中", null, false);
     try {
       const headers = utils.getHeadersFromCookie();
       const formData = new FormData();
@@ -294,6 +294,19 @@ const ProductModal = (props) => {
                   <label className="form-check-label" htmlFor="isEnabled">
                     是否啟用
                   </label>
+                </div>
+                <div className="row g-3 mb-3 mt-1">
+                <label htmlFor="buyerNumber">購買人數</label>
+                  <input
+                      name="buyerNumber"
+                      id="buyerNumber"
+                      type="number"
+                      className="form-control"
+                      placeholder="請輸入購買人數"
+                      min={0}
+                      value={modalproduct.buyerNumber}
+                      onChange={handleEditDataChange}
+                    />
                 </div>
               </div>
             </div>

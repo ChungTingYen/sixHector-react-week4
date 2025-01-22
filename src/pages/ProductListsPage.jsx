@@ -131,8 +131,10 @@ const ProductLists = () => {
   const handleAddProduct = async () => {
     utils.modalStatus(ProductDetailModalRef,"ProductListPage 建立中", null, false);
     const productIndex = parseInt(Date.now()) % productDataAtLocal.length;
+    const temp = { ...productDataAtLocal[productIndex],buyerNumber:100 };
     const wrapData = {
-      data: productDataAtLocal[productIndex],
+      // data: productDataAtLocal[productIndex],
+      data:temp
     };
     try {
       const headers = utils.getHeadersFromCookie();
@@ -284,6 +286,7 @@ const ProductLists = () => {
                     {/* <th style={{ width: "10%" }}>細節</th>
                     <th style={{ width: "10%" }}>刪除</th> */}
                     <th style={{ width: "20%" }}>功能</th>
+                    <th>假的購買人數</th>
                   </tr>
                 </thead>
                 <tbody>

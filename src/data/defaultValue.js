@@ -9,6 +9,7 @@ export const tempProductDefaultValue = {
   content: "",
   is_enabled: false,
   imagesUrl: [""],
+  buyerNumber:0
 };
 
 export const pendingProductInfoDefaluValue = {
