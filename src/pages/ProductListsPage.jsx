@@ -180,7 +180,7 @@ const ProductLists = () => {
       <div className="row mt-1 mb-2 mx-1">
         <div className="d-flex justify-content-between">
           <div className="d-flex align-items-center mb-2">
-            <h3>內層功能</h3>
+            <h3>產品功能</h3>
             <button
               type="button"
               className="btn btn-warning mx-1"

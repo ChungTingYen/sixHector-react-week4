@@ -35,7 +35,7 @@ const AppFunction = (props) => {
     <>
       <div className="row mt-5 mt-1 mb-2 mx-1">
         <div className="d-flex">
-          <h3>外層功能</h3>
+          <h3>檢查功能</h3>
           <button
             type="button"
             className="btn btn-warning mx-1"
