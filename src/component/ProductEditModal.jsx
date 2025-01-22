@@ -159,12 +159,6 @@ const ProductModal = (props) => {
   };
   return (
     <>
-    <ProductDetailModal
-    ref={ProductDetailModalRef}
-    modalBodyText="訊息"
-    modalSize={{ width: "300px", height: "200px" }}
-    modalImgSize={{ width: "300px", height: "120px" }}
-  />
     <div
       id="productModal"
       className="modal fade"
@@ -435,6 +429,12 @@ const ProductModal = (props) => {
         </div>
       </div>
     </div>
+    <ProductDetailModal
+    ref={ProductDetailModalRef}
+    modalBodyText="訊息"
+    modalSize={{ width: "300px", height: "200px" }}
+    modalImgSize={{ width: "300px", height: "120px" }}
+  />
     </>
   );
 };

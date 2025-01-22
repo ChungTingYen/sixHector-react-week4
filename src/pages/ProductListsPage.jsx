@@ -247,7 +247,6 @@ const ProductLists = () => {
               onChange={(e) => setPriceAscending(e.target.checked)}
               className="mx-1 form-check-input"
             />
-            {/* {priceAscending.toString()} */}
           </div>
           <div className="me-2 mx-1 ms-5">
             測試Desbounce for category:
