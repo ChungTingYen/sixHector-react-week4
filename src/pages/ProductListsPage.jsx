@@ -94,7 +94,7 @@ const ProductLists = () => {
     } catch (error) {
       alert(error.response.data.message);
       console.log(error);
-    }
+    } 
   },[setProductData,pageInfo,setPageInfo]);
   const handleDeleteModal = useCallback(
     (productId) => {
@@ -126,7 +126,6 @@ const ProductLists = () => {
     },
     [productData]
   );
-
   //上傳內建資料隨機一項產品
   const handleAddProduct = async () => {
     utils.modalStatus(ProductDetailModalRef,"ProductListPage 建立中", null, false);
@@ -148,8 +147,10 @@ const ProductLists = () => {
     } catch (error) {
       alert(error.response.data.message);
       console.log(error);
+    } finally{
+      ProductDetailModalRef.current.close();
     }
-    ProductDetailModalRef.current.close();
+    
   };
   //上傳全部內建資料產品
   const handleAddAllProducts = async () => {
@@ -174,6 +175,7 @@ const ProductLists = () => {
 
   useEffect(() => {
     getProductData();
+
   }, []);
 
   return (

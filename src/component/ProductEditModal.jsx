@@ -89,8 +89,10 @@ const ProductModal = (props) => {
     } catch (error) {
       alert("上傳主圖錯誤:" + error);
       console.log(error);
+    } finally{
+      ProductDetailModalRef.current.close();
     }
-    ProductDetailModalRef.current.close();
+    
   };
   const handleEditDataChange = (e) => {
     const { name, type, value, checked } = e.target;
@@ -152,10 +154,11 @@ const ProductModal = (props) => {
       }
     } catch (error) {
       alert(modalMode === "create" ? "新增失敗:" : "更新失敗:" + error);
+    } finally{
+      uploadRef.current.value = "";
+      ProductDetailModalRef.current.close();
+      closeEditModal();
     }
-    uploadRef.current.value = "";
-    ProductDetailModalRef.current.close();
-    closeEditModal();
   };
   return (
     <>

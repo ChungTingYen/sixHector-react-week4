@@ -50,9 +50,10 @@ const ProductDeleteModal = (props)=>{
     } catch (error) {
       console.error("刪除產品時發生錯誤：", error);
       alert("刪除產品時發生錯誤：", error);
+    } finally{
+      ProductDetailModalRef.current.close();
+      closeDeleteModal();
     }
-    ProductDetailModalRef.current.close();
-    closeDeleteModal();
   };
   return (
     <>

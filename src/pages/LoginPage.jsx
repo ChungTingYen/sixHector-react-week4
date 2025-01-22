@@ -46,7 +46,6 @@ const Login = () => {
     }
   };
   useEffect(() => {
-    console.log('handleCheckLogin2');
     handleCheckLogin2();
   });
   return (

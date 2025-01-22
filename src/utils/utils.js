@@ -58,9 +58,8 @@ export async function AddProductsSequentially(productData) {
   const results = []; 
   const headers = getHeadersFromCookie();
   for (const [index, data] of productData.entries()) { 
-    // console.log(`index=${index}`); 
-    // console.log("headers=", headers); 
-    const wrapData = { data: data };
+    const wrapData = { data:{ ...data,buyerNumber:100 } };
+    // const wrapData = { data: temp };
     try { 
       await apiService.axiosPostAddProduct(
         `/api/${APIPath}/admin/product`,
