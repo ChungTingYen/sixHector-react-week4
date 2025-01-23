@@ -11,7 +11,8 @@ import {
   ProductDetailModal,
   ProductEditModal,
   ProductDeleteModal,
-  AppFunction
+  AppFunction,
+  Toast
 } from "../component";
 import { useDebounce } from "@uidotdev/usehooks";
 const APIPath = import.meta.env.VITE_API_PATH;
@@ -27,6 +28,8 @@ const ProductLists = () => {
   const [category, setCategory] = useState("");
   const [priceAscending, setPriceAscending] = useState(false);
   const [ProductDetailModalType,setProductDetailModalType] = useState('');
+  const [isShowToast,setIsShowToast] = useState(false);
+  const toastInfoRef = useRef({ toastText:'',type:'' });
   //
   const ProductDetailModalRef = useRef(null);
 
@@ -38,6 +41,7 @@ const ProductLists = () => {
   };
   const getCategoryProducts = async (query) => {
     setProductDetailModalType('loading');
+    utils.modalStatus(ProductDetailModalRef,"", null, false);
     try {
       const headers = utils.getHeadersFromCookie();
       const resProduct = await apiService.axiosGetProductDataByConfig(
@@ -92,6 +96,7 @@ const ProductLists = () => {
       );
       setProductData(resProduct.data.products);
       setPageInfo(resProduct.data.pagination);
+      
     } catch (error) {
       alert(error.response.data.message);
       console.log(error);
@@ -144,8 +149,12 @@ const ProductLists = () => {
         headers
       );
       resProduct.data.success && getProductData();
-      alert(resProduct.data.success ? resProduct.data.message : "新增商品失敗");
+      // alert(resProduct.data.success ? resProduct.data.message : "新增商品失敗");
+      setIsShowToast(true);
+      toastInfoRef.current = { ...toastInfoRef.current,type:'success',toastText:'成功上傳!' };
     } catch (error) {
+      toastInfoRef.current = { ...toastInfoRef.current,type:'danger',toastText:'失敗了啦!' };
+      setIsShowToast(true);
       alert(error.response.data.message);
       console.log(error);
     } finally{
@@ -177,6 +186,7 @@ const ProductLists = () => {
 
   useEffect(() => {
     getProductData();
+   
   }, []);
 
   return (
@@ -332,7 +342,8 @@ const ProductLists = () => {
         isProductDeleteModalOpen={isProductDeleteModalOpen}
         setIsProductDeleteModalOpen={setIsProductDeleteModalOpen}
         editProduct={editProduct}
-      />
+        isShowToast={isShowToast} 
+        setIsShowToast={setIsShowToast}/>
 
       <ProductDetailModal
         ref={ProductDetailModalRef}
@@ -341,6 +352,10 @@ const ProductLists = () => {
         modalImgSize={{ width: "300px", height: "120px" }}
         productDetailModalType={ProductDetailModalType}
       />
+      <Toast toastText={toastInfoRef.current.toastText}
+        type = {toastInfoRef.current.type}
+        isShowToast={isShowToast} 
+        setIsShowToast={setIsShowToast}/>
     </>
   );
 };

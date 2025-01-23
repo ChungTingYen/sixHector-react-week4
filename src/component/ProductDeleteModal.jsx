@@ -3,7 +3,7 @@ import { useEffect, useRef,memo,useState  } from "react";
 import { Modal } from "bootstrap";
 import * as apiService from "../apiService/apiService";
 import * as utils from "../utils/utils";
-import { ProductDetailModal } from '.';
+import { ProductDetailModal,Toast } from '.';
 const APIPath = import.meta.env.VITE_API_PATH;
 const ProductDeleteModal = (props)=>{
   const {
@@ -16,6 +16,7 @@ const ProductDeleteModal = (props)=>{
   const [ProductDetailModalType,setProductDetailModalType] = useState('');
   const deleteModalDivRef = useRef(null);
   const ProductDetailModalRef = useRef(null);
+  const [isShowToast,setIsShowToast] = useState(false);
   useEffect(() => {
     if (deleteModalDivRef.current) {
       new Modal(deleteModalDivRef.current, { backdrop: false });
@@ -28,7 +29,6 @@ const ProductDeleteModal = (props)=>{
   const openDeleteModal = () => {
     const modalInstance = Modal.getInstance(deleteModalDivRef.current);
     modalInstance.show();
-    
   };
   const closeDeleteModal = () => {
     const modalInstance = Modal.getInstance(deleteModalDivRef.current);
@@ -39,6 +39,7 @@ const ProductDeleteModal = (props)=>{
   const deleteProductInModal = async () => {
     if (editProduct?.id === null) return;
     setProductDetailModalType('deleting');
+    closeDeleteModal();
     utils.modalStatus(ProductDetailModalRef,"", null, false);
     try {
       const headers = utils.getHeadersFromCookie();
@@ -48,7 +49,8 @@ const ProductDeleteModal = (props)=>{
       );
       setModalMode(null);
       getProductData();
-      alert("刪除產品完成");
+      // alert("刪除產品完成");
+      setIsShowToast(true);
     } catch (error) {
       console.error("刪除產品時發生錯誤：", error);
       alert("刪除產品時發生錯誤：", error);
@@ -59,6 +61,11 @@ const ProductDeleteModal = (props)=>{
   };
   return (
     <>
+      <Toast toastText='Operation Successful!'
+        type = 'danger'
+        isShowToast={isShowToast} 
+        setIsShowToast={setIsShowToast}/>
+    
       <ProductDetailModal
         ref={ProductDetailModalRef}
         modalBodyText="訊息"
