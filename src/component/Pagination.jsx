@@ -2,7 +2,8 @@
 import { memo } from 'react';
 const Pagination = (props) => {
   const { getProductData, pageInfo } = props;
-  const handlePageChange = (page) => {
+  const handlePageChange = (e,page) => {
+    e.preventDefault();
     getProductData(page);
   };
   return (
@@ -14,7 +15,7 @@ const Pagination = (props) => {
               <a
                 className="page-link"
                 href="#"
-                onClick={() => handlePageChange(pageInfo.current_page - 1)}
+                onClick={(e) => handlePageChange(e,pageInfo.current_page - 1)}
               >
                 上一頁
               </a>
@@ -29,7 +30,7 @@ const Pagination = (props) => {
                 >
                   <a
                     className="page-link"
-                    onClick={() => handlePageChange(index + 1)}
+                    onClick={(e) => handlePageChange(e,index + 1)}
                     href="#"
                   >
                     {index + 1}
@@ -41,7 +42,7 @@ const Pagination = (props) => {
               <a
                 className="page-link"
                 href="#"
-                onClick={() => handlePageChange(pageInfo.current_page + 1)}
+                onClick={(e) => handlePageChange(e,pageInfo.current_page + 1)}
               >
                 下一頁
               </a>

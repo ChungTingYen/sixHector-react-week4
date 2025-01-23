@@ -35,7 +35,7 @@ const Login = () => {
       console.log(error);
     }
   };
-  const handleCheckLogin2 = async () => {
+  const handleCheckLogin = async () => {
     const headers = utils.getHeadersFromCookie();
     if (headers === null) return;
     try {
@@ -46,7 +46,7 @@ const Login = () => {
     }
   };
   useEffect(() => {
-    handleCheckLogin2();
+    handleCheckLogin();
   });
   return (
     <>

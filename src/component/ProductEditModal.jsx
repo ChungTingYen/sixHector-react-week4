@@ -23,6 +23,7 @@ const ProductModal = (props) => {
   const editModalDivRef = useRef(null);
   const uploadRef = useRef(null);
   const ProductDetailModalRef = useRef(null);
+  const [ProductDetailModalType,setProductDetailModalType] = useState(null);
 
   useEffect(()=>{
     setModalproduct(editProduct);
@@ -74,6 +75,7 @@ const ProductModal = (props) => {
     modalInstance.show();
   };
   const handleImgUpload = async (e) => {
+    setProductDetailModalType( 'loading');
     utils.modalStatus(ProductDetailModalRef,"進行中", null, false);
     try {
       const headers = utils.getHeadersFromCookie();
@@ -142,6 +144,7 @@ const ProductModal = (props) => {
       alert("未取得product ID");
       return;
     }
+    setProductDetailModalType( 'loading');
     utils.modalStatus(ProductDetailModalRef,"進行中", null, false);
     try {
       const result = await implementEditProduct(modalMode, modalproduct);
@@ -149,15 +152,15 @@ const ProductModal = (props) => {
         getProductData();
         setModalproduct(tempProductDefaultValue);
         alert(modalMode === "create" ? "新增完成" : "更新完成");
+        uploadRef.current.value = "";
+        closeEditModal();
       } else {
         alert(modalMode === "create" ? "新增失敗:" : "更新失敗:");
       }
     } catch (error) {
       alert(modalMode === "create" ? "新增失敗:" : "更新失敗:" + error);
     } finally{
-      uploadRef.current.value = "";
       ProductDetailModalRef.current.close();
-      closeEditModal();
     }
   };
   return (
@@ -319,7 +322,6 @@ const ProductModal = (props) => {
               <div className="col-12 ">
                 <div className="mb-3">
                   <label htmlFor="fileInput" className="form-label">
-                    {" "}
                     主圖上傳{" "}
                   </label>
                   <input
@@ -345,19 +347,22 @@ const ProductModal = (props) => {
                     onChange={handleEditDataChange}
                   />
                 </div>
-                <div style={{ width: "100%", height: "500px" }}>
-                  <img
-                    src={modalproduct.imageUrl}
-                    alt={modalproduct.title}
-                    className="img-fluid"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
+                {modalproduct.imageUrl && 
+                  <div style={{ width: "100%", height: "500px" }}>
+                    <img
+                      src={modalproduct.imageUrl}
+                      alt={modalproduct.title}
+                      className="img-fluid"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
+                }
               </div>
+              <hr />
               {modalproduct.imagesUrl.map((image, index) => (
                 <div key={index} className="col-md-6 mb-1">
                   <label
@@ -398,7 +403,8 @@ const ProductModal = (props) => {
                       />
                     )}
                   </div>
-                  <hr />
+                  { modalproduct.imagesUrl.length > 2 && <hr />}
+                  
                 </div>
               ))}
             </div>
@@ -450,6 +456,7 @@ const ProductModal = (props) => {
     modalBodyText="訊息"
     modalSize={{ width: "300px", height: "200px" }}
     modalImgSize={{ width: "300px", height: "120px" }}
+    productDetailModalType={ProductDetailModalType}
   />
     </>
   );

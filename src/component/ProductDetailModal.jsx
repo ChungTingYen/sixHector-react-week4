@@ -10,7 +10,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal } from "bootstrap";
 
 const ProductDetailModal = forwardRef((props, ref) => {
-  const { modalBodyText, modalSize, modalImgSize } = props;
+  const { modalBodyText, modalSize, modalImgSize,  productDetailModalType } = props;
   const modalDivRef1 = useRef(null);
   const modalRef1 = useRef(null);
   const imageRef = useRef(null);
@@ -21,6 +21,21 @@ const ProductDetailModal = forwardRef((props, ref) => {
   //   document.body.style.overflow = "auto";
   //   console.log('restoreStyle');
   // };
+  const getMessage = (productDetailModalType = null) => {
+    if(imageRef.current)
+      imageRef.current.style.display = "none";
+    switch(productDetailModalType) {
+    case 'loading':
+      return '載入中...';
+    case 'creating':
+      return '建立中...';
+    case 'deleting':
+      return '刪除中...';
+    default:
+      return'.........';
+    }
+    
+  };
   useEffect(() => {
     modalRef1.current = new Modal(modalDivRef1.current);
   }, []);
@@ -104,11 +119,13 @@ const ProductDetailModal = forwardRef((props, ref) => {
               style={modalImgSize}
               id="modalBody"
             >
+              {getMessage(productDetailModalType)}
               <img
                 // src={imageSrc}
                 ref={imageRef}
                 className="img-fluid"
-                alt="進行中"
+                // alt="進行中"
+                alt=''
                 style={{ maxWidth: "100%", maxHeight: "100%" }}
                 id="picture"
               />

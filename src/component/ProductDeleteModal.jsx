@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useEffect, useRef,memo  } from "react";
+import { useEffect, useRef,memo,useState  } from "react";
 import { Modal } from "bootstrap";
 import * as apiService from "../apiService/apiService";
 import * as utils from "../utils/utils";
@@ -11,8 +11,9 @@ const ProductDeleteModal = (props)=>{
     setModalMode,
     isProductDeleteModalOpen,
     setIsProductDeleteModalOpen,
-    getProductData
+    getProductData,
   } = props;
+  const [ProductDetailModalType,setProductDetailModalType] = useState('');
   const deleteModalDivRef = useRef(null);
   const ProductDetailModalRef = useRef(null);
   useEffect(() => {
@@ -27,6 +28,7 @@ const ProductDeleteModal = (props)=>{
   const openDeleteModal = () => {
     const modalInstance = Modal.getInstance(deleteModalDivRef.current);
     modalInstance.show();
+    
   };
   const closeDeleteModal = () => {
     const modalInstance = Modal.getInstance(deleteModalDivRef.current);
@@ -36,14 +38,14 @@ const ProductDeleteModal = (props)=>{
   };
   const deleteProductInModal = async () => {
     if (editProduct?.id === null) return;
-    utils.modalStatus(ProductDetailModalRef,"ProductListPage 進行中", null, false);
+    setProductDetailModalType('deleting');
+    utils.modalStatus(ProductDetailModalRef,"", null, false);
     try {
       const headers = utils.getHeadersFromCookie();
       await apiService.axiosDeleteProduct(
         `/api/${APIPath}/admin/product/${editProduct.id}`,
         headers
       );
-      //   setEditProduct(tempProductDefaultValue);
       setModalMode(null);
       getProductData();
       alert("刪除產品完成");
@@ -62,6 +64,7 @@ const ProductDeleteModal = (props)=>{
         modalBodyText="訊息"
         modalSize={{ width: "300px", height: "200px" }}
         modalImgSize={{ width: "300px", height: "120px" }}
+        productDetailModalType={ProductDetailModalType}
       />
       <div
         className="modal fade"

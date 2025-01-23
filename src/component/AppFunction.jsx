@@ -24,6 +24,7 @@ const AppFunction = (props) => {
       const res = await apiService.axiosPostLogout("/logout", headers);
       alert(res.data.success ? res.data.message : "登出失敗");
       if (res.data.success) {
+        document.cookie = "authToken; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
         setIsLogin(false);
       }
     } catch (error) {

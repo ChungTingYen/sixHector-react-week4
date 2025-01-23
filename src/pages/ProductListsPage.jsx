@@ -26,6 +26,7 @@ const ProductLists = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [priceAscending, setPriceAscending] = useState(false);
+  const [ProductDetailModalType,setProductDetailModalType] = useState('');
   //
   const ProductDetailModalRef = useRef(null);
 
@@ -36,8 +37,7 @@ const ProductLists = () => {
     setCategory(e.target.value);
   };
   const getCategoryProducts = async (query) => {
-    utils.modalStatus(ProductDetailModalRef,"ProductListPage Desbounce 進行中", null, false);
-    console.log("debounce");
+    setProductDetailModalType('loading');
     try {
       const headers = utils.getHeadersFromCookie();
       const resProduct = await apiService.axiosGetProductDataByConfig(
@@ -72,7 +72,8 @@ const ProductLists = () => {
   }, [productData, search, priceAscending]);
 
   const handleGetProducts = async () => {
-    utils.modalStatus(ProductDetailModalRef,"ProductListPage 載入中", null, false);
+    setProductDetailModalType('loading');
+    utils.modalStatus(ProductDetailModalRef,"", null, false);
     await getProductData();
     ProductDetailModalRef.current.close();
   };
@@ -128,11 +129,11 @@ const ProductLists = () => {
   );
   //上傳內建資料隨機一項產品
   const handleAddProduct = async () => {
-    utils.modalStatus(ProductDetailModalRef,"ProductListPage 建立中", null, false);
+    setProductDetailModalType('creating');
+    utils.modalStatus(ProductDetailModalRef,"", null, false);
     const productIndex = parseInt(Date.now()) % productDataAtLocal.length;
     const temp = { ...productDataAtLocal[productIndex],buyerNumber:100 };
     const wrapData = {
-      // data: productDataAtLocal[productIndex],
       data:temp
     };
     try {
@@ -150,11 +151,11 @@ const ProductLists = () => {
     } finally{
       ProductDetailModalRef.current.close();
     }
-    
   };
   //上傳全部內建資料產品
   const handleAddAllProducts = async () => {
-    utils.modalStatus(ProductDetailModalRef,"ProductListPage 上傳中", null, false);
+    setProductDetailModalType('loading');
+    utils.modalStatus(ProductDetailModalRef,"", null, false);
     const results = await utils.AddProductsSequentially(productDataAtLocal);
     setEditProduct(tempProductDefaultValue);
     !results.length ? alert('上傳成功') : alert(results.join(","));
@@ -163,7 +164,8 @@ const ProductLists = () => {
   };
   //刪除第一頁全部產品
   const handleDeleteAllProducts = async () => {
-    utils.modalStatus(ProductDetailModalRef,"ProductListPage 刪除中", null, false);
+    setProductDetailModalType('deleting');
+    utils.modalStatus(ProductDetailModalRef,"", null, false);
     if (productData.length > 0) {
       const results = await utils.deleteProductsSequentially(productData);
       setEditProduct(tempProductDefaultValue);
@@ -175,7 +177,6 @@ const ProductLists = () => {
 
   useEffect(() => {
     getProductData();
-
   }, []);
 
   return (
@@ -338,6 +339,7 @@ const ProductLists = () => {
         modalBodyText="訊息"
         modalSize={{ width: "300px", height: "200px" }}
         modalImgSize={{ width: "300px", height: "120px" }}
+        productDetailModalType={ProductDetailModalType}
       />
     </>
   );
