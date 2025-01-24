@@ -15,27 +15,6 @@ export const getHeadersFromCookie = ()=>{
   return headers;
 };
 
-export const getProductData_old = async (headers,setProductData,pagesRef)=>{
-  try {
-    // axios.defaults.headers.common.Authorization = token;
-    const resProduct = await apiService.axiosGetProductData(
-      `/api/${APIPath}/admin/products`,
-      headers
-    ) || [];
-    setProductData(resProduct.data.products);
-    const { current_page, total_pages, category } = resProduct.data.pagination;
-    const categoryValue = category || '';
-    pagesRef.current = {
-      current_page: current_page || 0,
-      total_pages: total_pages || 0,
-      category: categoryValue
-    };
-  } catch (error) {
-    alert(error.response.data.message);
-    console.log(error);
-  }
-};
-
 export async function deleteProductsSequentially(productData) { 
   const results = []; 
   const headers = getHeadersFromCookie();

@@ -44,7 +44,7 @@ const ProductDeleteModal = (props)=>{
     utils.modalStatus(ProductDetailModalRef,"", null, false);
     try {
       await apiService.axiosDeleteProduct(
-        `/api/${APIPath}/admin/product/${editProduct.id + 26161}`,
+        `/api/${APIPath}/admin/product/${editProduct.id}`,
       );
       setModalMode(null);
       getProductData();
