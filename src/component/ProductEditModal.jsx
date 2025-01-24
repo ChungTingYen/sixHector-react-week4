@@ -139,7 +139,6 @@ const ProductModal = (props) => {
     } catch (error) {
       console.log(error);
       return false;
-      // alert("上傳失敗");
     }
   };
   const handleUpdateProduct = async () => {
@@ -160,7 +159,6 @@ const ProductModal = (props) => {
           setIsShowToast(true);
           toastInfo.type = 'success';
           toastInfo.toastText = (modalMode === "create" ? "新增完成" : "更新完成");
-        
       } else {
         alert(modalMode === "create" ? "新增失敗:" : "更新失敗:");
       }
