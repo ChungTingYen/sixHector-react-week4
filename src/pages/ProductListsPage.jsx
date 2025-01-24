@@ -15,6 +15,7 @@ import {
   Toast
 } from "../component";
 import { useDebounce } from "@uidotdev/usehooks";
+import { toastInfo } from "../data/dataModel";
 const APIPath = import.meta.env.VITE_API_PATH;
 
 const ProductLists = () => {
@@ -29,7 +30,6 @@ const ProductLists = () => {
   const [priceAscending, setPriceAscending] = useState(false);
   const [ProductDetailModalType,setProductDetailModalType] = useState('');
   const [isShowToast,setIsShowToast] = useState(false);
-  const toastInfoRef = useRef({ toastText:'',type:'' });
   //
   const ProductDetailModalRef = useRef(null);
 
@@ -63,7 +63,6 @@ const ProductLists = () => {
     debouncedSearchTerm
       ? getCategoryProducts(debouncedSearchTerm)
       : handleGetProducts();
-    console.log("debouncedSearchTerm=", debouncedSearchTerm);
   }, [debouncedSearchTerm]);
 
   const filterData = useMemo(() => {
@@ -151,10 +150,9 @@ const ProductLists = () => {
       resProduct.data.success && getProductData();
       // alert(resProduct.data.success ? resProduct.data.message : "新增商品失敗");
       setIsShowToast(true);
-      toastInfoRef.current = { ...toastInfoRef.current,type:'success',toastText:'成功上傳!' };
+      toastInfo.type = 'success';
+      toastInfo.toastText = '成功上傳!' ;
     } catch (error) {
-      toastInfoRef.current = { ...toastInfoRef.current,type:'danger',toastText:'失敗了啦!' };
-      setIsShowToast(true);
       alert(error.response.data.message);
       console.log(error);
     } finally{
@@ -167,9 +165,15 @@ const ProductLists = () => {
     utils.modalStatus(ProductDetailModalRef,"", null, false);
     const results = await utils.AddProductsSequentially(productDataAtLocal);
     setEditProduct(tempProductDefaultValue);
-    !results.length ? alert('上傳成功') : alert(results.join(","));
-    !results.length && getProductData();
+    if(!results.length){
+      setIsShowToast(true);
+      toastInfo.type = 'success';
+      toastInfo.toastText = '成功上傳!' ;
+      getProductData();
+    } else alert(results.join(","));
     ProductDetailModalRef.current.close();
+    // !results.length ? alert('上傳成功') : alert(results.join(","));
+    // !results.length && getProductData();
   };
   //刪除第一頁全部產品
   const handleDeleteAllProducts = async () => {
@@ -178,15 +182,20 @@ const ProductLists = () => {
     if (productData.length > 0) {
       const results = await utils.deleteProductsSequentially(productData);
       setEditProduct(tempProductDefaultValue);
-      !results.length ? alert('刪除成功') : alert(results.join(","));
-      getProductData();
+      if(!results.length){
+        setIsShowToast(true);
+        toastInfo.type = 'danger';
+        toastInfo.toastText = '刪除完成!' ;
+        getProductData();
+      }else alert(results.join(","));
+      // !results.length ? alert('刪除成功') : alert(results.join(","));
+      // getProductData();
     }
     ProductDetailModalRef.current.close();
   };
 
   useEffect(() => {
     getProductData();
-   
   }, []);
 
   return (
@@ -352,8 +361,8 @@ const ProductLists = () => {
         modalImgSize={{ width: "300px", height: "120px" }}
         productDetailModalType={ProductDetailModalType}
       />
-      <Toast toastText={toastInfoRef.current.toastText}
-        type = {toastInfoRef.current.type}
+      <Toast toastText={toastInfo.toastText}
+        type = {toastInfo.type}
         isShowToast={isShowToast} 
         setIsShowToast={setIsShowToast}/>
     </>

@@ -18,7 +18,6 @@ const ToastComponent = ({ toastText, type = 'success',isShowToast,setIsShowToast
       showToast();
       setIsShowToast(false);
     }
-    console.log('isShowToast:',isShowToast);
   },[isShowToast]);
 
   const showToast = () => {

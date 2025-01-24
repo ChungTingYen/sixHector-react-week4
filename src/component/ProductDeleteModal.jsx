@@ -4,6 +4,7 @@ import { Modal } from "bootstrap";
 import * as apiService from "../apiService/apiService";
 import * as utils from "../utils/utils";
 import { ProductDetailModal,Toast } from '.';
+import { toastInfo } from '../data/dataModel';
 const APIPath = import.meta.env.VITE_API_PATH;
 const ProductDeleteModal = (props)=>{
   const {
@@ -51,6 +52,8 @@ const ProductDeleteModal = (props)=>{
       getProductData();
       // alert("刪除產品完成");
       setIsShowToast(true);
+      toastInfo.type = 'success';
+      toastInfo.toastText = '完成刪除!' ;
     } catch (error) {
       console.error("刪除產品時發生錯誤：", error);
       alert("刪除產品時發生錯誤：", error);
@@ -61,8 +64,8 @@ const ProductDeleteModal = (props)=>{
   };
   return (
     <>
-      <Toast toastText='Operation Successful!'
-        type = 'danger'
+      <Toast toastText={toastInfo.toastText}
+        type = {toastInfo.type}
         isShowToast={isShowToast} 
         setIsShowToast={setIsShowToast}/>
     

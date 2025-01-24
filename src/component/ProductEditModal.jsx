@@ -6,6 +6,8 @@ import * as apiService from "../apiService/apiService";
 import * as utils from "../utils/utils";
 import { tempProductDefaultValue } from "../data/defaultValue";
 import { ProductDetailModal } from '.';
+import { Toast } from ".";
+import { toastInfo } from '../data/dataModel';
 
 const APIPath = import.meta.env.VITE_API_PATH;
 
@@ -24,6 +26,7 @@ const ProductModal = (props) => {
   const uploadRef = useRef(null);
   const ProductDetailModalRef = useRef(null);
   const [ProductDetailModalType,setProductDetailModalType] = useState(null);
+  const [isShowToast,setIsShowToast] = useState(false);
 
   useEffect(()=>{
     setModalproduct(editProduct);
@@ -149,11 +152,15 @@ const ProductModal = (props) => {
     try {
       const result = await implementEditProduct(modalMode, modalproduct);
       if (result) {
+        closeEditModal();
         getProductData();
         setModalproduct(tempProductDefaultValue);
-        alert(modalMode === "create" ? "新增完成" : "更新完成");
         uploadRef.current.value = "";
-        closeEditModal();
+        // alert(modalMode === "create" ? "新增完成" : "更新完成");
+          setIsShowToast(true);
+          toastInfo.type = 'success';
+          toastInfo.toastText = (modalMode === "create" ? "新增完成" : "更新完成");
+        
       } else {
         alert(modalMode === "create" ? "新增失敗:" : "更新失敗:");
       }
@@ -458,6 +465,11 @@ const ProductModal = (props) => {
     modalImgSize={{ width: "300px", height: "120px" }}
     productDetailModalType={ProductDetailModalType}
   />
+        <Toast toastText={toastInfo.toastText}
+        type = {toastInfo.type}
+        isShowToast={isShowToast} 
+        setIsShowToast={setIsShowToast}/>
+    
     </>
   );
 };
