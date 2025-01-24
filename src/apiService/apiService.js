@@ -1,13 +1,12 @@
 import { adminInstance } from "./apiconfig";
 
-export const  axiosGetProductData = async(path,config)=>{
-  const response = await adminInstance.get(path, { headers: config });
+export const  axiosGetProductData = async(path)=>{
+  const response = await adminInstance.get(path);
   return response;
 };
 
 export const  axiosGetProductDataByConfig = async(path,config)=>{
   const response = await adminInstance.get(path,  config ) || {};
-  // console.log('config=',config);
   return response;
 };
 
@@ -16,36 +15,31 @@ export const axiosPostSignin = async(path,account) =>{
   return response;
 };
 
-export const axiosPostCheckSingin = async(path,config) =>{
-  const response = await adminInstance.post(path,{},{ headers: config });
+export const axiosPostCheckSingin = async(path) =>{
+  const response = await adminInstance.post(path,{},);
   return response;
 };
 
-export const axiosPostCheckSingin2 = async(path) =>{
+export const axiosPostLogout = async(path) =>{
   const response = await adminInstance.post(path,{});
   return response;
 };
-
-export const axiosPostLogout = async(path,config) =>{
-  const response = await adminInstance.post(path,{},{ headers: config });
-  return response;
-};
-export const axiosPostAddProduct = async(path,productData,config) =>{
-  const response = await adminInstance.post(path,productData,{ headers: config });
+export const axiosPostAddProduct = async(path,productData) =>{
+  const response = await adminInstance.post(path,productData);
   return response;
 };
 
-export const axiosDeleteProduct = async(path,config) =>{
-  const response = await adminInstance.delete(path,{ headers: config });
+export const axiosDeleteProduct = async(path) =>{
+  const response = await adminInstance.delete(path);
   return response;
 };
 
-export const axiosPutProduct = async(path,putData,config)=>{
-  const response = await adminInstance.put(path,putData,{ headers: config });
+export const axiosPutProduct = async(path,putData)=>{
+  const response = await adminInstance.put(path,putData);
   return response;
 };
 
-export const axiosPostImg = async(path,putData,config)=>{
-  const response = await adminInstance.post(path,putData,{ headers: config });
+export const axiosPostImg = async(path,putData,)=>{
+  const response = await adminInstance.post(path,putData);
   return response;
 };

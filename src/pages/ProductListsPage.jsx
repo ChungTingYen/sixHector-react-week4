@@ -43,14 +43,12 @@ const ProductLists = () => {
     setProductDetailModalType('loading');
     utils.modalStatus(ProductDetailModalRef,"", null, false);
     try {
-      const headers = utils.getHeadersFromCookie();
       const resProduct = await apiService.axiosGetProductDataByConfig(
         `/api/${APIPath}/admin/products`,
         {
           params: {
             category: query,
           },
-          headers: headers,
         }
       );
       setProductData(resProduct.data.products);
@@ -82,7 +80,6 @@ const ProductLists = () => {
   };
   const getProductData = useCallback(async (page = 1) => {
     try {
-      const headers = utils.getHeadersFromCookie();
       const resProduct = await apiService.axiosGetProductDataByConfig(
         `/api/${APIPath}/admin/products`,
         {
@@ -90,21 +87,19 @@ const ProductLists = () => {
             page: page,
             category: pageInfo.category,
           },
-          headers: headers,
         }
       );
       setProductData(resProduct.data.products);
       setPageInfo(resProduct.data.pagination);
-      
     } catch (error) {
-      alert(error.response.data.message);
       console.log(error);
     } 
   },[setProductData,pageInfo,setPageInfo]);
+  
   const handleDeleteModal = useCallback(
     (productId) => {
       const updatedProduct =
-        productData.find((product) => product.id === productId) || {};
+        productData.find((product) => product.id === productId) ?? {};
       setEditProduct(updatedProduct);
       setIsProductDeleteModalOpen(true);
     },
@@ -117,7 +112,7 @@ const ProductLists = () => {
         setModalMode(mode);
       } else if (productId && mode === "edit") {
         const { imagesUrl = [], ...rest } =
-          productData.find((product) => product.id === productId) || {};
+          productData.find((product) => product.id === productId) ?? {};
         const updatedProduct = {
           ...rest,
           imagesUrl: imagesUrl.filter(Boolean),
@@ -141,19 +136,15 @@ const ProductLists = () => {
       data:temp
     };
     try {
-      const headers = utils.getHeadersFromCookie();
       const resProduct = await apiService.axiosPostAddProduct(
         `/api/${APIPath}/admin/product`,
         wrapData,
-        headers
       );
       resProduct.data.success && getProductData();
-      // alert(resProduct.data.success ? resProduct.data.message : "新增商品失敗");
       setIsShowToast(true);
       toastInfo.type = 'success';
       toastInfo.toastText = '成功上傳!' ;
     } catch (error) {
-      alert(error.response.data.message);
       console.log(error);
     } finally{
       ProductDetailModalRef.current.close();
@@ -170,10 +161,9 @@ const ProductLists = () => {
       toastInfo.type = 'success';
       toastInfo.toastText = '成功上傳!' ;
       getProductData();
-    } else alert(results.join(","));
+    } else 
+      alert(results.join(","));
     ProductDetailModalRef.current.close();
-    // !results.length ? alert('上傳成功') : alert(results.join(","));
-    // !results.length && getProductData();
   };
   //刪除第一頁全部產品
   const handleDeleteAllProducts = async () => {
@@ -187,9 +177,8 @@ const ProductLists = () => {
         toastInfo.type = 'danger';
         toastInfo.toastText = '刪除完成!' ;
         getProductData();
-      }else alert(results.join(","));
-      // !results.length ? alert('刪除成功') : alert(results.join(","));
-      // getProductData();
+      }else 
+        alert(results.join(","));
     }
     ProductDetailModalRef.current.close();
   };

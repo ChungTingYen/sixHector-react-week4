@@ -43,20 +43,16 @@ const ProductDeleteModal = (props)=>{
     closeDeleteModal();
     utils.modalStatus(ProductDetailModalRef,"", null, false);
     try {
-      const headers = utils.getHeadersFromCookie();
       await apiService.axiosDeleteProduct(
-        `/api/${APIPath}/admin/product/${editProduct.id}`,
-        headers
+        `/api/${APIPath}/admin/product/${editProduct.id + 26161}`,
       );
       setModalMode(null);
       getProductData();
-      // alert("刪除產品完成");
       setIsShowToast(true);
       toastInfo.type = 'success';
       toastInfo.toastText = '完成刪除!' ;
     } catch (error) {
       console.error("刪除產品時發生錯誤：", error);
-      alert("刪除產品時發生錯誤：", error);
     } finally{
       ProductDetailModalRef.current.close();
       closeDeleteModal();

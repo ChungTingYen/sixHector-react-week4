@@ -31,15 +31,12 @@ const Login = () => {
         setIsLogin(true);
       }
     } catch (error) {
-      alert("error:", error);
       console.log(error);
     }
   };
   const handleCheckLogin = async () => {
-    const headers = utils.getHeadersFromCookie();
-    if (headers === null) return;
     try {
-      await apiService.axiosPostCheckSingin("/api/user/check", headers);
+      await apiService.axiosPostCheckSingin("/api/user/check");
       setIsLogin(true);
     } catch (error) {
       console.log(error);

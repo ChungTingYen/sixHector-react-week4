@@ -81,18 +81,16 @@ const ProductModal = (props) => {
     setProductDetailModalType( 'loading');
     utils.modalStatus(ProductDetailModalRef,"進行中", null, false);
     try {
-      const headers = utils.getHeadersFromCookie();
       const formData = new FormData();
       formData.append("file-to-upload", e.target.files[0]);
       const result = await apiService.axiosPostImg(
         `/api/${APIPath}/admin/upload`,
         formData,
-        headers
       );
       result?.data?.success &&
         setModalproduct({ ...modalproduct, imageUrl: result.data.imageUrl });
     } catch (error) {
-      alert("上傳主圖錯誤:" + error);
+      // alert("上傳主圖錯誤:" + error);
       console.log(error);
     } finally{
       ProductDetailModalRef.current.close();
@@ -113,7 +111,6 @@ const ProductModal = (props) => {
   };
   const implementEditProduct = async (type, modalproduct) => {
     try {
-      const headers = utils.getHeadersFromCookie();
       const wrapData = {
         data: {
           ...modalproduct,
@@ -122,15 +119,14 @@ const ProductModal = (props) => {
         },
       };
       let path = "";
-      // const res = null;
       switch (type) {
         case "create":
           path = `/api/${APIPath}/admin/product`;
-          await apiService.axiosPostAddProduct(path, wrapData, headers);
+          await apiService.axiosPostAddProduct(path, wrapData);
           break;
         case "edit":
           path = `/api/${APIPath}/admin/product/${modalproduct.id}`;
-          await apiService.axiosPutProduct(path, wrapData, headers);
+          await apiService.axiosPutProduct(path, wrapData);
           break;
         default:
           break;
@@ -155,15 +151,14 @@ const ProductModal = (props) => {
         getProductData();
         setModalproduct(tempProductDefaultValue);
         uploadRef.current.value = "";
-        // alert(modalMode === "create" ? "新增完成" : "更新完成");
-          setIsShowToast(true);
-          toastInfo.type = 'success';
-          toastInfo.toastText = (modalMode === "create" ? "新增完成" : "更新完成");
+        setIsShowToast(true);
+        toastInfo.type = 'success';
+        toastInfo.toastText = (modalMode === "create" ? "新增完成" : "更新完成");
       } else {
         alert(modalMode === "create" ? "新增失敗:" : "更新失敗:");
       }
     } catch (error) {
-      alert(modalMode === "create" ? "新增失敗:" : "更新失敗:" + error);
+      console.log(error);
     } finally{
       ProductDetailModalRef.current.close();
     }
